@@ -1,4 +1,5 @@
 workspace:
+  base: /go
   path: src/github.com/glynternet/mon
 
 pipeline:
