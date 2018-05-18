@@ -1,3 +1,6 @@
+workspace:
+  path: src/github.com/glynternet/mon
+
 pipeline:
   build:
     image: golang
