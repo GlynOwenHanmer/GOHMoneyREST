@@ -3,7 +3,7 @@ workspace:
   path: src/github.com/glynternet/mon
 
 pipeline:
-  build:
+  test:
     image: golang
     commands:
       - go test -v -race ./...
