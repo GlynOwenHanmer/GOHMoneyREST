@@ -115,19 +115,24 @@ func makeHeader(accounts storage.Accounts) []string {
 	for _, a := range accounts {
 		hs = append(hs, a.Account.Name())
 	}
+	hs = append(hs, "total")
 	return hs
 }
 
 func makeRow(date time.Time, abss []AccountBalances) ([]string, error) {
 	dateString := date.Format("20060102")
 	row := []string{dateString}
+	var bs balance.Balances
 	for _, abs := range abss {
 		b, err := abs.Balances.AtTime(date)
 		if err != nil && err.Error() != gerrors.New(balance.ErrNoBalances).Error() {
 			return nil, errors.Wrapf(err, "getting balance for account:%s at time:%s", abs.Account.Account.Name(), dateString)
 		}
 		row = append(row, strconv.Itoa(b.Amount))
+		bs = append(bs, b)
 	}
+	total := bs.Sum()
+	row = append(row, strconv.Itoa(total))
 	return row, nil
 }
 
