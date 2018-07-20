@@ -202,7 +202,7 @@ type AccountBalances struct {
 func getAmountGenerators() (map[string]amountGenerator, error) {
 	return map[string]amountGenerator{
 		"daily spending": dailyRecurringAmount{
-			Amount: -6000,
+			Amount: -1500,
 			from:   now,
 		},
 		"rent": monthlyRecurringCost{
@@ -213,6 +213,26 @@ func getAmountGenerators() (map[string]amountGenerator, error) {
 		"energy bill": monthlyRecurringCost{
 			amount:      -3150,
 			dateOfMonth: 12,
+			from:        now,
+		},
+		"haircut": monthlyRecurringCost{
+			amount:      -2400, //every 6 weeks
+			dateOfMonth: 26,
+			from:        now,
+		},
+		"ABN Amro bank account": monthlyRecurringCost{
+			amount:      -155, //every 6 weeks
+			dateOfMonth: 19,
+			from:        now,
+		},
+		"Swapfiets": monthlyRecurringCost{
+			amount:      -1500, //every 6 weeks
+			dateOfMonth: 3,
+			from:        now,
+		},
+		"ABN Maandpremie": monthlyRecurringCost{
+			amount:      -1461, //every 6 weeks
+			dateOfMonth: 3,
 			from:        now,
 		},
 	}, nil
