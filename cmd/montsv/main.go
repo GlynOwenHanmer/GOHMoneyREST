@@ -113,7 +113,7 @@ func recurringCostsAccounts(times []time.Time) (AccountBalances, error) {
 	if err != nil {
 		return AccountBalances{}, errors.Wrap(err, "getting recurring costs")
 	}
-	abs, err := generateRecurringCostAccount(rc, times)
+	abs, err := rc.generateAccountBalances(times)
 	if err != nil {
 		return AccountBalances{}, errors.Wrap(err, "generating recurring cost account")
 	}
@@ -170,47 +170,14 @@ type AccountBalances struct {
 	balance.Balances
 }
 
-type dailyRecurringCost struct {
-	currency.Code
-	Amount int
-}
-
-func getRecurringCosts() (dailyRecurringCost, error) {
+func getRecurringCosts() (recurringCost, error) {
 	cc, err := currency.NewCode(currencyString)
 	if err != nil {
 		return dailyRecurringCost{}, errors.Wrap(err, "creating new currency code")
 	}
 	return dailyRecurringCost{
+		name:   "daily spending",
 		Code:   *cc,
 		Amount: -6000,
 	}, nil
-}
-
-func generateRecurringCostAccount(rcs dailyRecurringCost, times []time.Time) (AccountBalances, error) {
-	a, err := account.New("recurring account", rcs.Code, time.Time{})
-	if err != nil {
-		return AccountBalances{}, errors.Wrap(err, "creating new account")
-	}
-	var bs balance.Balances
-	for _, t := range times {
-		var amount int
-		if t.After(now) {
-			amount = int(t.Sub(now)/(time.Hour*24)) * rcs.Amount
-		}
-		b, err := balance.New(t, balance.Amount(amount))
-		if err != nil {
-			return AccountBalances{}, errors.Wrap(err, "creating balance")
-		}
-		bs = append(bs, *b)
-	}
-	return AccountBalances{
-		Account:  *a,
-		Balances: bs,
-	}, nil
-
-	//for _, t := range times {
-	//	// only occur cost if time is past now
-	//
-	//}
-	//return nil, nil
 }
