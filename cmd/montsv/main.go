@@ -80,11 +80,11 @@ var cmdTSV = &cobra.Command{
 			times = append(times, now.Add(time.Hour*24*time.Duration(i)))
 		}
 
-		abs, err := recurringCostsAccounts(times)
+		gabss, err := generatedAccountBalances(times)
 		if err != nil {
 			return errors.Wrap(err, "getting recurring costs accounts")
 		}
-		abss = append(abss, abs)
+		abss = append(abss, gabss...)
 
 		datedBalances := [][]string{makeHeader(abss)}
 
@@ -104,16 +104,50 @@ var cmdTSV = &cobra.Command{
 	},
 }
 
-func recurringCostsAccounts(times []time.Time) (AccountBalances, error) {
-	rc, err := getAmountGenerators()
+func generatedAccountBalances(times []time.Time) ([]AccountBalances, error) {
+	ags, err := getAmountGenerators()
 	if err != nil {
-		return AccountBalances{}, errors.Wrap(err, "getting recurring costs")
+		return nil, errors.Wrap(err, "getting recurring costs")
 	}
-	abs, err := rc.generateAccountBalances(times)
+	var abss []AccountBalances
+	for name, ag := range ags {
+		abs, err := generateAccountBalances(name, ag, times)
+		if err != nil {
+			return nil, errors.Wrap(err, "generating AccountBalances")
+		}
+		abss = append(abss, abs)
+	}
+	return abss, nil
+}
+
+func generateAccountBalances(name string, ag amountGenerator, times []time.Time) (AccountBalances, error) {
+	cc, err := currency.NewCode("EUR")
 	if err != nil {
-		return AccountBalances{}, errors.Wrap(err, "generating recurring cost account")
+		return AccountBalances{}, errors.Wrapf(err, "creating new currency code")
 	}
-	return abs, nil
+
+	a, err := account.New(name, *cc, time.Time{}) // time/date of account is not used currently
+	if err != nil {
+		return AccountBalances{}, errors.Wrap(err, "creating new account")
+	}
+
+	var bs balance.Balances
+	for _, t := range times {
+		b, err := generateBalance(ag, t)
+		if err != nil {
+			return AccountBalances{}, errors.Wrapf(err, "generating balance for time:%s", t)
+		}
+		bs = append(bs, *b)
+	}
+	return AccountBalances{
+		Account:  *a,
+		Balances: bs,
+	}, nil
+}
+
+func generateBalance(ag amountGenerator, at time.Time) (*balance.Balance, error) {
+	b, err := balance.New(at, balance.Amount(ag.generateAmount(at)))
+	return b, errors.Wrap(err, "creating balance")
 }
 
 func init() {
@@ -165,15 +199,21 @@ type AccountBalances struct {
 	balance.Balances
 }
 
-func getAmountGenerators() (amountGenerator, error) {
-	cc, err := currency.NewCode(currencyString)
-	if err != nil {
-		return dailyRecurringCost{}, errors.Wrap(err, "creating new currency code")
-	}
-	return dailyRecurringCost{
-		name:   "daily spending",
-		Code:   *cc,
-		Amount: -6000,
-		from:   now,
+func getAmountGenerators() (map[string]amountGenerator, error) {
+	return map[string]amountGenerator{
+		"daily spending": dailyRecurringAmount{
+			Amount: -6000,
+			from:   now,
+		},
+		"rent": monthlyRecurringCost{
+			amount:      -85800,
+			dateOfMonth: 1,
+			from:        now,
+		},
+		"energy bill": monthlyRecurringCost{
+			amount:      -3150,
+			dateOfMonth: 12,
+			from:        now,
+		},
 	}, nil
 }
