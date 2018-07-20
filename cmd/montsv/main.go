@@ -23,7 +23,8 @@ import (
 const (
 	appName = "montsv"
 
-	keyServerHost = "server-host"
+	keyServerHost     = "server-host"
+	keyDaysEitherSide = "days-either-side"
 )
 
 func main() {
@@ -35,7 +36,6 @@ func main() {
 }
 
 const (
-	daysEitherSide = 90
 	currencyString = "EUR"
 )
 
@@ -76,6 +76,7 @@ var cmdTSV = &cobra.Command{
 		}
 
 		var times []time.Time
+		daysEitherSide := viper.GetInt(keyDaysEitherSide)
 		for i := -daysEitherSide; i <= daysEitherSide; i++ {
 			times = append(times, now.Add(time.Hour*24*time.Duration(i)))
 		}
@@ -152,8 +153,9 @@ func generateBalance(ag amountGenerator, at time.Time) (*balance.Balance, error)
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	cmdTSV.PersistentFlags().StringP(keyServerHost, "H", "", "server host")
-	err := viper.BindPFlags(cmdTSV.PersistentFlags())
+	cmdTSV.Flags().StringP(keyServerHost, "H", "", "server host")
+	cmdTSV.Flags().Uint(keyDaysEitherSide, 90, "days either side of now to provide data for")
+	err := viper.BindPFlags(cmdTSV.Flags())
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "binding root command flags"))
 	}
@@ -208,6 +210,11 @@ func getAmountGenerators() (map[string]amountGenerator, error) {
 		"rent": monthlyRecurringCost{
 			amount:      -85800,
 			dateOfMonth: 1,
+			from:        now,
+		},
+		"health insurance": monthlyRecurringCost{
+			amount:      -10250,
+			dateOfMonth: 27,
 			from:        now,
 		},
 		"energy bill": monthlyRecurringCost{
