@@ -77,10 +77,13 @@ func newMonthlyRecurringCost(name string, dateOfMonth int, amount int) (*monthly
 func (mrc monthlyRecurringCost) generateAmount(at time.Time) int {
 	offsetFromMonths := int(at.Month() - mrc.from.Month())
 	var offsetFromDateOfMonth int
-	//if at.Day() > mrc.from.Day() {
-	//	offsetFromDateOfMonth = 1
-	//}
+	if at.Day() > mrc.dateOfMonth {
+		offsetFromDateOfMonth = 1
+	}
 	occurrences := offsetFromDateOfMonth + offsetFromMonths
+	if occurrences < 0 {
+		occurrences = 0
+	}
 
 	// for each at, the balance is equal to the number of the specific dates that have passed
 	return occurrences * mrc.amount
