@@ -43,12 +43,6 @@ func (rcs dailyRecurringCost) generateAccountBalances(times []time.Time) (Accoun
 		Account:  *a,
 		Balances: bs,
 	}, nil
-
-	//for _, t := range times {
-	//	// only occur cost if time is past now
-	//
-	//}
-	//return nil, nil
 }
 
 type monthlyRecurringCost struct {

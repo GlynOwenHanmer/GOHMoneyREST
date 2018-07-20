@@ -100,11 +100,7 @@ var cmdTSV = &cobra.Command{
 		w.Comma = '\t'
 		w.WriteAll(datedBalances) // calls Flush internally
 
-		if err := w.Error(); err != nil {
-			log.Fatalln("error writing csv:", err)
-		}
-
-		return nil
+		return errors.Wrap(w.Error(), "writing separated values")
 	},
 }
 
@@ -117,7 +113,6 @@ func recurringCostsAccounts(times []time.Time) (AccountBalances, error) {
 	if err != nil {
 		return AccountBalances{}, errors.Wrap(err, "generating recurring cost account")
 	}
-	log.Println(abs.Account.Name())
 	return abs, nil
 }
 
