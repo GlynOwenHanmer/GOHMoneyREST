@@ -12,8 +12,8 @@ import (
 
 const maxMonthlyDate = 28
 
-type balanceGenerator interface {
-	generateBalance(time time.Time) (*balance.Balance, error)
+type amountGenerator interface {
+	generateAmount(time time.Time) int
 	generateAccountBalances(times []time.Time) (AccountBalances, error)
 }
 
@@ -24,12 +24,16 @@ type dailyRecurringCost struct {
 	from   time.Time
 }
 
-func (rcs dailyRecurringCost) generateBalance(at time.Time) (*balance.Balance, error) {
+func (rcs dailyRecurringCost) generateAmount(at time.Time) int {
 	var amount int
 	if at.After(rcs.from) {
 		amount = int(at.Sub(rcs.from)/(time.Hour*24)) * rcs.Amount
 	}
-	b, err := balance.New(at, balance.Amount(amount))
+	return amount
+}
+
+func (rcs dailyRecurringCost) generateBalance(at time.Time) (*balance.Balance, error) {
+	b, err := balance.New(at, balance.Amount(rcs.generateAmount(at)))
 	return b, errors.Wrap(err, "creating balance")
 }
 
@@ -53,25 +57,31 @@ func (rcs dailyRecurringCost) generateAccountBalances(times []time.Time) (Accoun
 }
 
 type monthlyRecurringCost struct {
-	name string
-	date int
-	currency.Code
-	amount int
+	name        string
+	from        time.Time
+	dateOfMonth int
+	amount      int
 }
 
-func newMonthlyRecurringCost(name string, date int, cc currency.Code, amount int) (*monthlyRecurringCost, error) {
-	if date > maxMonthlyDate {
-		return nil, fmt.Errorf("date cannot be more than %d", maxMonthlyDate)
+func newMonthlyRecurringCost(name string, dateOfMonth int, amount int) (*monthlyRecurringCost, error) {
+	if dateOfMonth > maxMonthlyDate {
+		return nil, fmt.Errorf("dateOfMonth cannot be more than %d", maxMonthlyDate)
 	}
 	return &monthlyRecurringCost{
-		name:   name,
-		date:   date,
-		Code:   cc,
-		amount: amount,
+		name:        name,
+		dateOfMonth: dateOfMonth,
+		amount:      amount,
 	}, nil
 }
 
-func (mrc monthlyRecurringCost) generateAccountBalances(times []time.Time) (AccountBalances, error) {
-	// for each time, the balance is equal to the number of the specific dates that have passed
-	return AccountBalances{}, errors.New("not implemented")
+func (mrc monthlyRecurringCost) generateAmount(at time.Time) int {
+	offsetFromMonths := int(at.Month() - mrc.from.Month())
+	var offsetFromDateOfMonth int
+	//if at.Day() > mrc.from.Day() {
+	//	offsetFromDateOfMonth = 1
+	//}
+	occurrences := offsetFromDateOfMonth + offsetFromMonths
+
+	// for each at, the balance is equal to the number of the specific dates that have passed
+	return occurrences * mrc.amount
 }

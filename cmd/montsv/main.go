@@ -105,7 +105,7 @@ var cmdTSV = &cobra.Command{
 }
 
 func recurringCostsAccounts(times []time.Time) (AccountBalances, error) {
-	rc, err := getBalanceGenerators()
+	rc, err := getAmountGenerators()
 	if err != nil {
 		return AccountBalances{}, errors.Wrap(err, "getting recurring costs")
 	}
@@ -165,7 +165,7 @@ type AccountBalances struct {
 	balance.Balances
 }
 
-func getBalanceGenerators() (balanceGenerator, error) {
+func getAmountGenerators() (amountGenerator, error) {
 	cc, err := currency.NewCode(currencyString)
 	if err != nil {
 		return dailyRecurringCost{}, errors.Wrap(err, "creating new currency code")
