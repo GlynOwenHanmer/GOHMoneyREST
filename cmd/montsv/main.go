@@ -10,11 +10,11 @@ import (
 	"encoding/csv"
 	"os"
 
+	"github.com/glynternet/go-accounting/account"
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/go-money/currency"
 	"github.com/glynternet/mon/internal/client"
 	"github.com/glynternet/mon/pkg/filter"
-	"github.com/glynternet/mon/pkg/storage"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,6 +36,7 @@ func main() {
 
 const (
 	daysEitherSide = 90
+	currencyString = "EUR"
 )
 
 var now = time.Now()
@@ -49,7 +50,7 @@ var cmdTSV = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "selecting accounts")
 		}
-		cc, err := currency.NewCode("EUR")
+		cc, err := currency.NewCode(currencyString)
 		if err != nil {
 			return errors.Wrap(err, "creating currency code")
 		}
@@ -69,14 +70,25 @@ var cmdTSV = &cobra.Command{
 				bs = append(bs, sb.Balance)
 			}
 			abss = append(abss, AccountBalances{
-				Account:  a,
+				Account:  a.Account,
 				Balances: bs,
 			})
 		}
 
-		datedBalances := [][]string{makeHeader(*as)}
+		var times []time.Time
 		for i := -daysEitherSide; i <= daysEitherSide; i++ {
-			t := now.Add(time.Hour * 24 * time.Duration(i))
+			times = append(times, now.Add(time.Hour*24*time.Duration(i)))
+		}
+
+		abs, err := recurringCostsAccounts(times)
+		if err != nil {
+			return errors.Wrap(err, "getting recurring costs accounts")
+		}
+		abss = append(abss, abs)
+
+		datedBalances := [][]string{makeHeader(abss)}
+
+		for _, t := range times {
 			row, err := makeRow(t, abss)
 			if err != nil {
 				return errors.Wrapf(err, "making row at time:%s", t.Format("20060102"))
@@ -96,6 +108,19 @@ var cmdTSV = &cobra.Command{
 	},
 }
 
+func recurringCostsAccounts(times []time.Time) (AccountBalances, error) {
+	rc, err := getRecurringCosts()
+	if err != nil {
+		return AccountBalances{}, errors.Wrap(err, "getting recurring costs")
+	}
+	abs, err := generateRecurringCostAccount(rc, times)
+	if err != nil {
+		return AccountBalances{}, errors.Wrap(err, "generating recurring cost account")
+	}
+	log.Println(abs.Account.Name())
+	return abs, nil
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 	cmdTSV.PersistentFlags().StringP(keyServerHost, "H", "", "server host")
@@ -110,10 +135,10 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 }
 
-func makeHeader(accounts storage.Accounts) []string {
+func makeHeader(accounts []AccountBalances) []string {
 	hs := []string{"date"}
 	for _, a := range accounts {
-		hs = append(hs, a.Account.Name())
+		hs = append(hs, a.Name())
 	}
 	hs = append(hs, "total")
 	return hs
@@ -125,11 +150,15 @@ func makeRow(date time.Time, abss []AccountBalances) ([]string, error) {
 	var bs balance.Balances
 	for _, abs := range abss {
 		b, err := abs.Balances.AtTime(date)
-		if err != nil && err.Error() != gerrors.New(balance.ErrNoBalances).Error() {
-			return nil, errors.Wrapf(err, "getting balance for account:%s at time:%s", abs.Account.Account.Name(), dateString)
+		switch {
+		case err == nil:
+			row = append(row, strconv.Itoa(b.Amount))
+			bs = append(bs, b)
+		case err.Error() == gerrors.New(balance.ErrNoBalances).Error():
+			row = append(row, "")
+		case err != nil:
+			return nil, errors.Wrapf(err, "getting balance for account:%s at time:%s", abs.Account.Name(), dateString)
 		}
-		row = append(row, strconv.Itoa(b.Amount))
-		bs = append(bs, b)
 	}
 	total := bs.Sum()
 	row = append(row, strconv.Itoa(total))
@@ -137,6 +166,51 @@ func makeRow(date time.Time, abss []AccountBalances) ([]string, error) {
 }
 
 type AccountBalances struct {
-	storage.Account
+	account.Account
 	balance.Balances
+}
+
+type dailyRecurringCost struct {
+	currency.Code
+	Amount int
+}
+
+func getRecurringCosts() (dailyRecurringCost, error) {
+	cc, err := currency.NewCode(currencyString)
+	if err != nil {
+		return dailyRecurringCost{}, errors.Wrap(err, "creating new currency code")
+	}
+	return dailyRecurringCost{
+		Code:   *cc,
+		Amount: -6000,
+	}, nil
+}
+
+func generateRecurringCostAccount(rcs dailyRecurringCost, times []time.Time) (AccountBalances, error) {
+	a, err := account.New("recurring account", rcs.Code, time.Time{})
+	if err != nil {
+		return AccountBalances{}, errors.Wrap(err, "creating new account")
+	}
+	var bs balance.Balances
+	for _, t := range times {
+		var amount int
+		if t.After(now) {
+			amount = int(t.Sub(now)/(time.Hour*24)) * rcs.Amount
+		}
+		b, err := balance.New(t, balance.Amount(amount))
+		if err != nil {
+			return AccountBalances{}, errors.Wrap(err, "creating balance")
+		}
+		bs = append(bs, *b)
+	}
+	return AccountBalances{
+		Account:  *a,
+		Balances: bs,
+	}, nil
+
+	//for _, t := range times {
+	//	// only occur cost if time is past now
+	//
+	//}
+	//return nil, nil
 }
