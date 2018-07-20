@@ -10,16 +10,27 @@ import (
 	"github.com/pkg/errors"
 )
 
-type recurringCost interface {
+const maxMonthlyDate = 28
+
+type balanceGenerator interface {
+	generateBalance(time time.Time) (*balance.Balance, error)
 	generateAccountBalances(times []time.Time) (AccountBalances, error)
 }
-
-const maxMonthlyDate = 28
 
 type dailyRecurringCost struct {
 	name string
 	currency.Code
 	Amount int
+	from   time.Time
+}
+
+func (rcs dailyRecurringCost) generateBalance(at time.Time) (*balance.Balance, error) {
+	var amount int
+	if at.After(rcs.from) {
+		amount = int(at.Sub(rcs.from)/(time.Hour*24)) * rcs.Amount
+	}
+	b, err := balance.New(at, balance.Amount(amount))
+	return b, errors.Wrap(err, "creating balance")
 }
 
 func (rcs dailyRecurringCost) generateAccountBalances(times []time.Time) (AccountBalances, error) {
@@ -29,13 +40,9 @@ func (rcs dailyRecurringCost) generateAccountBalances(times []time.Time) (Accoun
 	}
 	var bs balance.Balances
 	for _, t := range times {
-		var amount int
-		if t.After(now) {
-			amount = int(t.Sub(now)/(time.Hour*24)) * rcs.Amount
-		}
-		b, err := balance.New(t, balance.Amount(amount))
+		b, err := rcs.generateBalance(t)
 		if err != nil {
-			return AccountBalances{}, errors.Wrap(err, "creating balance")
+			return AccountBalances{}, errors.Wrapf(err, "generating balance for time:%s", t)
 		}
 		bs = append(bs, *b)
 	}
@@ -65,5 +72,6 @@ func newMonthlyRecurringCost(name string, date int, cc currency.Code, amount int
 }
 
 func (mrc monthlyRecurringCost) generateAccountBalances(times []time.Time) (AccountBalances, error) {
+	// for each time, the balance is equal to the number of the specific dates that have passed
 	return AccountBalances{}, errors.New("not implemented")
 }
