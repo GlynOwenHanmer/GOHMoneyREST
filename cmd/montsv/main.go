@@ -15,6 +15,7 @@ import (
 	"github.com/glynternet/go-money/currency"
 	"github.com/glynternet/mon/internal/client"
 	"github.com/glynternet/mon/pkg/filter"
+	"github.com/glynternet/mon/pkg/storage"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -51,9 +52,6 @@ var cmdTSV = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "selecting accounts")
 		}
-		cc, err := currency.NewCode(currencyString)
-		if err != nil {
-			return errors.Wrap(err, "creating currency code")
 
 		var times []time.Time
 		for i := -viper.GetInt(keyHistoricDays); i <= viper.GetInt(keyForecastDays); i++ {
@@ -64,7 +62,11 @@ var cmdTSV = &cobra.Command{
 		}
 
 		*as = filter.AccountCondition(filter.AccountConditions{
-			filter.Currency(*cc),
+			filter.Existed(times[len(times)-1]),
+			func(a storage.Account) bool {
+				closedBeforeFirstTime := a.Account.Closed().Valid && a.Account.Closed().Time.Before(times[0])
+				return !closedBeforeFirstTime
+			},
 		}.And).Filter(*as)
 
 		var abss []AccountBalances
