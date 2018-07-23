@@ -23,8 +23,9 @@ import (
 const (
 	appName = "montsv"
 
-	keyServerHost     = "server-host"
-	keyDaysEitherSide = "days-either-side"
+	keyServerHost   = "server-host"
+	keyHistoricDays = "historic-days"
+	keyForecastDays = "forecast-days"
 )
 
 func main() {
@@ -53,6 +54,13 @@ var cmdTSV = &cobra.Command{
 		cc, err := currency.NewCode(currencyString)
 		if err != nil {
 			return errors.Wrap(err, "creating currency code")
+
+		var times []time.Time
+		for i := -viper.GetInt(keyHistoricDays); i <= viper.GetInt(keyForecastDays); i++ {
+			times = append(times, now.Add(time.Hour*24*time.Duration(i)))
+		}
+		if len(times) == 0 {
+			return errors.New("date range yielded no dates")
 		}
 
 		*as = filter.AccountCondition(filter.AccountConditions{
@@ -73,12 +81,6 @@ var cmdTSV = &cobra.Command{
 				Account:  a.Account,
 				Balances: bs,
 			})
-		}
-
-		var times []time.Time
-		daysEitherSide := viper.GetInt(keyDaysEitherSide)
-		for i := -daysEitherSide; i <= daysEitherSide; i++ {
-			times = append(times, now.Add(time.Hour*24*time.Duration(i)))
 		}
 
 		gabss, err := generatedAccountBalances(times)
@@ -154,7 +156,8 @@ func generateBalance(ag amountGenerator, at time.Time) (*balance.Balance, error)
 func init() {
 	cobra.OnInitialize(initConfig)
 	cmdTSV.Flags().StringP(keyServerHost, "H", "", "server host")
-	cmdTSV.Flags().Uint(keyDaysEitherSide, 90, "days either side of now to provide data for")
+	cmdTSV.Flags().Int(keyHistoricDays, 90, "days either side of now to provide data for")
+	cmdTSV.Flags().Int(keyForecastDays, 30*6, "days in the future to provide data for")
 	err := viper.BindPFlags(cmdTSV.Flags())
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "binding root command flags"))
