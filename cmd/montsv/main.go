@@ -75,10 +75,7 @@ var cmdTSV = &cobra.Command{
 			if err != nil {
 				errors.Wrap(err, "selecting balances for account")
 			}
-			var bs balance.Balances
-			for _, sb := range *sbs {
-				bs = append(bs, sb.Balance)
-			}
+			var bs = sbs.InnerBalances()
 			abss = append(abss, AccountBalances{
 				Account:  a.Account,
 				Balances: bs,
@@ -115,8 +112,8 @@ func generatedAccountBalances(times []time.Time) ([]AccountBalances, error) {
 		return nil, errors.Wrap(err, "getting recurring costs")
 	}
 	var abss []AccountBalances
-	for name, ag := range ags {
-		abs, err := generateAccountBalances(name, ag, times)
+	for details, ag := range ags {
+		abs, err := generateAccountBalances(details, ag, times)
 		if err != nil {
 			return nil, errors.Wrap(err, "generating AccountBalances")
 		}
@@ -125,13 +122,13 @@ func generatedAccountBalances(times []time.Time) ([]AccountBalances, error) {
 	return abss, nil
 }
 
-func generateAccountBalances(name string, ag amountGenerator, times []time.Time) (AccountBalances, error) {
-	cc, err := currency.NewCode("EUR")
+func generateAccountBalances(ds accountDetails, ag amountGenerator, times []time.Time) (AccountBalances, error) {
+	cc, err := currency.NewCode(ds.currencyString)
 	if err != nil {
 		return AccountBalances{}, errors.Wrapf(err, "creating new currency code")
 	}
 
-	a, err := account.New(name, *cc, time.Time{}) // time/date of account is not used currently
+	a, err := account.New(ds.name, *cc, time.Time{}) // time/date of account is not used currently
 	if err != nil {
 		return AccountBalances{}, errors.Wrap(err, "creating new account")
 	}
@@ -206,45 +203,90 @@ type AccountBalances struct {
 	balance.Balances
 }
 
-func getAmountGenerators() (map[string]amountGenerator, error) {
-	return map[string]amountGenerator{
-		"daily spending": dailyRecurringAmount{
+type accountDetails struct {
+	name           string
+	currencyString string
+}
+
+func getAmountGenerators() (map[accountDetails]amountGenerator, error) {
+	return map[accountDetails]amountGenerator{
+		{
+			name:           "daily spending",
+			currencyString: "EUR",
+		}: dailyRecurringAmount{
 			Amount: -1500,
 			from:   now,
 		},
-		"rent": monthlyRecurringCost{
+		{
+			name:           "rent",
+			currencyString: "EUR",
+		}: monthlyRecurringCost{
 			amount:      -85800,
 			dateOfMonth: 1,
 			from:        now,
 		},
-		"health insurance": monthlyRecurringCost{
+		{
+			name:           "health insurance",
+			currencyString: "EUR",
+		}: monthlyRecurringCost{
 			amount:      -10250,
 			dateOfMonth: 27,
 			from:        now,
 		},
-		"energy bill": monthlyRecurringCost{
+		{
+			name:           "energy bill",
+			currencyString: "EUR",
+		}: monthlyRecurringCost{
 			amount:      -3150,
 			dateOfMonth: 12,
 			from:        now,
 		},
-		"haircut": monthlyRecurringCost{
+		{
+			name:           "haircut",
+			currencyString: "EUR",
+		}: monthlyRecurringCost{
 			amount:      -2400, //every 6 weeks
 			dateOfMonth: 26,
 			from:        now,
 		},
-		"ABN Amro bank account": monthlyRecurringCost{
+		{
+			name:           "ABN Amro bank account",
+			currencyString: "EUR",
+		}: monthlyRecurringCost{
 			amount:      -155, //every 6 weeks
 			dateOfMonth: 19,
 			from:        now,
 		},
-		"Swapfiets": monthlyRecurringCost{
+		{
+			name:           "Swapfiets",
+			currencyString: "EUR",
+		}: monthlyRecurringCost{
 			amount:      -1500, //every 6 weeks
 			dateOfMonth: 3,
 			from:        now,
 		},
-		"ABN Maandpremie": monthlyRecurringCost{
-			amount:      -1461, //every 6 weeks
+		{
+			name:           "ABN Maandpremie",
+			currencyString: "EUR",
+		}: monthlyRecurringCost{
+			amount:      -1461,
 			dateOfMonth: 3,
+			from:        now,
+		},
+		{
+			name:           "O2 Phone Bill",
+			currencyString: "GBP",
+		}: monthlyRecurringCost{
+			amount:      -3000,
+			dateOfMonth: 17,
+			from:        now,
+		},
+		{
+			name:           "Natwest Contents Insurance",
+			currencyString: "GBP",
+		}: monthlyRecurringCost{
+			amount:      -1951,
+			dateOfMonth: 1,
 			from:        now,
 		},
 	}, nil
