@@ -107,12 +107,8 @@ var cmdTSV = &cobra.Command{
 }
 
 func generatedAccountBalances(times []time.Time) ([]AccountBalances, error) {
-	ags, err := getAmountGenerators()
-	if err != nil {
-		return nil, errors.Wrap(err, "getting recurring costs")
-	}
 	var abss []AccountBalances
-	for details, ag := range ags {
+	for details, ag := range getAmountGenerators() {
 		abs, err := generateAccountBalances(details, ag, times)
 		if err != nil {
 			return nil, errors.Wrap(err, "generating AccountBalances")
@@ -208,22 +204,22 @@ type accountDetails struct {
 	currencyString string
 }
 
-func getAmountGenerators() (map[accountDetails]amountGenerator, error) {
+func getAmountGenerators() map[accountDetails]amountGenerator {
 	return map[accountDetails]amountGenerator{
 		{
 			name:           "daily spending",
-			currencyString: "EUR",
+			currencyString: "GBP",
 		}: dailyRecurringAmount{
 			Amount: -1500,
 			from:   now,
 		},
 		{
-			name:           "rent",
+			name:           "storage",
 			currencyString: "EUR",
 		}: monthlyRecurringCost{
-			amount:      -85800,
+			amount:      -7900,
 			dateOfMonth: 1,
-			from:        now,
+			from:        time.Date(2018, 10, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			name:           "health insurance",
@@ -243,9 +239,9 @@ func getAmountGenerators() (map[accountDetails]amountGenerator, error) {
 		},
 		{
 			name:           "haircut",
-			currencyString: "EUR",
+			currencyString: "GBP",
 		}: monthlyRecurringCost{
-			amount:      -2400, //every 6 weeks
+			amount:      -2400, // ~ every 6 weeks
 			dateOfMonth: 26,
 			from:        now,
 		},
@@ -255,14 +251,6 @@ func getAmountGenerators() (map[accountDetails]amountGenerator, error) {
 		}: monthlyRecurringCost{
 			amount:      -155, //every 6 weeks
 			dateOfMonth: 19,
-			from:        now,
-		},
-		{
-			name:           "Swapfiets",
-			currencyString: "EUR",
-		}: monthlyRecurringCost{
-			amount:      -1500, //every 6 weeks
-			dateOfMonth: 3,
 			from:        now,
 		},
 		{
@@ -282,12 +270,11 @@ func getAmountGenerators() (map[accountDetails]amountGenerator, error) {
 			from:        now,
 		},
 		{
-			name:           "Natwest Contents Insurance",
-			currencyString: "GBP",
-		}: monthlyRecurringCost{
-			amount:      -1951,
-			dateOfMonth: 1,
-			from:        now,
+			name:           "John & Emily Registration",
+			currencyString: "EUR",
+		}: dailyRecurringAmount{
+			Amount: -142, // =-1000/7, Tenner a week
+			from:   now,
 		},
-	}, nil
+	}
 }
