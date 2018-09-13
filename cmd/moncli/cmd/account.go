@@ -138,6 +138,41 @@ var accountOpenCmd = &cobra.Command{
 	},
 }
 
+var accountReopenCmd = &cobra.Command{
+	Use:   "reopen [ID]",
+	Short: "reopen an account",
+	Long:  "reopen removes an account's closed date",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, err := parseID(args[0])
+		if err != nil {
+			return errors.Wrap(err, "parsing account id")
+		}
+
+		c := newClient()
+
+		a, err := c.SelectAccount(uint(id))
+		if err != nil {
+			return errors.Wrap(err, "selecting account")
+		}
+
+		aux := a.Account
+		us, err := account.New(aux.Name(), aux.CurrencyCode(), aux.Opened())
+		if err != nil {
+			return errors.Wrap(err, "creating updates account from selected account")
+		}
+
+		b, err := c.UpdateAccount(a, us)
+		if err != nil {
+			return errors.Wrap(err, "applying updates")
+		}
+
+		fmt.Println("Reopened:")
+		table.Accounts(storage.Accounts{*b}, os.Stdout)
+		return nil
+	},
+}
+
 var accountDeleteCmd = &cobra.Command{
 	Use:   "delete [ID]",
 	Short: "delete an account",
@@ -465,6 +500,7 @@ func init() {
 	for _, c := range []*cobra.Command{
 		accountAddCmd,
 		accountOpenCmd,
+		accountReopenCmd,
 		accountCloseCmd,
 		accountUpdateCmd,
 		accountDeleteCmd,
