@@ -62,3 +62,12 @@ pipeline:
       - docker-compose --project-name mon-monserve-client-functional-test down
       - docker-compose --project-name mon-monserve-client-functional-test up --build --abort-on-container-exit --force-recreate
       - docker-compose --project-name mon-monserve-client-functional-test down
+
+  release:
+    image: goreleaser/goreleaser:v0.86
+    secrets: [ github_token ]
+    commands:
+      - git fetch --no-tags origin +refs/tags/${DRONE_TAG}:refs/tags/${DRONE_TAG}
+      - goreleaser release --rm-dist
+    when:
+      event: tag

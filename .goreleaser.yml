@@ -1,0 +1,19 @@
+builds:
+- binary: moncli
+  main: ./cmd/moncli/main.go
+  env:
+  - CGO_ENABLED=0
+  goarch:
+    - amd64
+- binary: monserve
+  main: ./cmd/monserve/main.go
+  env:
+  - CGO_ENABLED=0
+  goarch:
+    - amd64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "SNAPSHOT-{{ .Tag }}-{{ .Commit }}"
+changelog:
+  sort: asc
