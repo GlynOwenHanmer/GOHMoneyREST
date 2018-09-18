@@ -6,6 +6,11 @@ workspace:
 
 pipeline:
 
+  # drone mounts the root directory of the repository to the container and sets
+  # it as the working directory
+  run-linters:
+    image: glynhanmer/go-linters:1.10.3-alpine3.7
+
   run-unit-tests:
     image: golang:1.10.4
     commands:
