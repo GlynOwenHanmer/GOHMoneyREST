@@ -121,10 +121,10 @@ func accounts(store storage.Storage) (storage.Accounts, error) {
 	return *as, nil
 }
 
-func accountsBalances(store storage.Storage, as storage.Accounts, at time.Time) ([]accountbalance.AccountBalance, error) {
+func accountsBalances(s storage.Storage, as storage.Accounts, at time.Time) ([]accountbalance.AccountBalance, error) {
 	var abs []accountbalance.AccountBalance
 	for _, a := range as {
-		b, err := accountBalanceAtTime(store, a, at)
+		b, err := accountBalanceAtTime(s, a, at)
 		if err != nil {
 			log.Println(errors.Wrapf(err, "getting balance at time:%+v for account:%+v", at, a))
 			continue
@@ -224,7 +224,8 @@ func init() {
 	accountsCmd.PersistentFlags().StringSliceVar(&currencies, keyCurrencies, []string{}, "filter by currencies")
 	accountsCmd.Flags().BoolP(keyQuiet, "q", false, "show only account ids")
 	accountsCmd.PersistentFlags().Var(atDate, keyAtDate, "show balances at a certain date")
-	accountsCmd.PersistentFlags().Var(sortBy, keySortBy, fmt.Sprintf("sort by one of %s", strings.Join(sort.AllKeys(), ",")))
+	sortByKeys := strings.Join(sort.AllKeys(), ",")
+	accountsCmd.PersistentFlags().Var(sortBy, keySortBy, fmt.Sprintf("sort by one of %s", sortByKeys))
 
 	accountsCmd.AddCommand(accountsBalancesCmd)
 

@@ -444,7 +444,7 @@ var accountBalanceCmd = &cobra.Command{
 
 		b, err := accountBalanceAtTime(c, *a, t)
 		if err != nil {
-			errors.Wrapf(err, "getting balance at time:%+v for account:%+v", t, a)
+			return errors.Wrapf(err, "getting balance at time:%+v for account:%+v", t, a)
 		}
 		fmt.Println(b.Amount)
 		return nil
