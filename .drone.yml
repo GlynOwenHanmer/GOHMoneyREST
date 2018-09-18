@@ -14,8 +14,7 @@ pipeline:
   build-storage-postgres-functional-tests-binary:
     image: golang:1.10.4
     commands:
-      - cd pkg/storage/postgres/test/functional
-      - make build-tests
+      - make -C pkg/storage/postgres/test/functional build-tests
 
   run-storage-postgres-functional-tests:
     image: docker/compose:1.21.2
@@ -45,8 +44,7 @@ pipeline:
   build-monserve-client-functional-tests-binary:
     image: golang:1.10.4
     commands:
-      - cd test/functional
-      - make build-tests
+      - make -C test/functional build-tests
   
   run-monserve-client-functional-tests:
     image: docker/compose:1.21.2
