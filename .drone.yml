@@ -6,6 +6,63 @@ workspace:
 
 pipeline:
 
+  # drone mounts the root directory of the repository to the container and sets
+  # it as the working directory
+  run-linters:
+    image: glynhanmer/go-linters:1.10.3-alpine3.7
+
+  run-unit-tests:
+    image: golang:1.10.4
+    commands:
+      - go test -v -race ./...
+
+  build-storage-postgres-functional-tests-binary:
+    image: golang:1.10.4
+    commands:
+      - make -C pkg/storage/postgres/test/functional build-tests
+
+  run-storage-postgres-functional-tests:
+    image: docker/compose:1.21.2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - FUNCTIONAL_TESTS_IMAGE_NAME=mon-pkg-storage-postgres-functional-tests
+      - FUNCTIONAL_TESTS_IMAGE_TAG=${DRONE_COMMIT_SHA:-NO_SHA}
+    commands:
+      - cd pkg/storage/postgres/test/functional
+      - docker-compose --project-name mon-pkg-storage-postgres-functional-test down
+      - docker-compose --project-name mon-pkg-storage-postgres-functional-test up --build --abort-on-container-exit --force-recreate
+      - docker-compose --project-name mon-pkg-storage-postgres-functional-test down
+
+  build-monserve-binary:
+    image: golang:1.10.4
+    commands:
+      - make monserve-binary
+  
+  build-monserve-image:
+    image: docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+      - docker build --tag monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA} .
+  
+  build-monserve-client-functional-tests-binary:
+    image: golang:1.10.4
+    commands:
+      - make -C test/functional build-tests
+  
+  run-monserve-client-functional-tests:
+    image: docker/compose:1.21.2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_IMAGE=monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA}
+    commands:
+      - cd test/functional
+      - docker-compose --project-name mon-monserve-client-functional-test down
+      - docker-compose --project-name mon-monserve-client-functional-test up --build --abort-on-container-exit --force-recreate
+      - docker-compose --project-name mon-monserve-client-functional-test down
+
   release:
     image: goreleaser/goreleaser:v0.86
     secrets: [ github_token ]
