@@ -461,7 +461,7 @@ func accountBalanceAtTime(store storage.Storage, a storage.Account, at time.Time
 		return balance.Balance{}, errors.Wrapf(err, "no balances for account:%+v", a)
 	}
 	b, err := bbs.AtTime(at)
-	return b, errors.Wrapf(err, "getting balance at time from returned balances", at, a)
+	return b, errors.Wrapf(err, "getting balance at time:%+v from returned balances:%+v", at, bbs)
 }
 
 func init() {
