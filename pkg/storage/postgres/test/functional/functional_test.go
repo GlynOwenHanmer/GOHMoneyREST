@@ -32,7 +32,8 @@ func init() {
 }
 
 func setup() {
-	const retries = 5
+	const retries = 10
+	const backoff = 2 * time.Second
 	errs := make([]error, retries)
 	var i int
 	for i = 0; i < retries; i++ {
@@ -46,7 +47,7 @@ func setup() {
 			break
 		}
 		errs[i] = err
-		time.Sleep(time.Second)
+		time.Sleep(backoff)
 	}
 	if errs[retries-1] != nil {
 		for i, err := range errs {
