@@ -38,6 +38,7 @@ moncli: binary test-binary-version-output
 binary:
 	$(GOBUILD_CMD) -o $(BUILD_DIR)/$(APP_NAME) ./cmd/$(APP_NAME)
 
-OUT = $(shell $(BUILD_DIR)/$(APP_NAME) version)
+test-binary-version-output: VERSION_CMD ?= $(BUILD_DIR)/$(APP_NAME) version
 test-binary-version-output:
-	test "$(OUT)" = "$(VERSION)" && echo PASSED
+	@echo testing output of $(VERSION_CMD)
+	test "$(shell $(VERSION_CMD))" = "$(VERSION)" && echo PASSED

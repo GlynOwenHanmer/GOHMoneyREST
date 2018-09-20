@@ -1,23 +1,12 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/spf13/cobra"
+	"github.com/glynternet/mon/internal/versioncmd"
 )
 
 // to be changed using ldflags with the go build command
 var version = "unknown"
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "show the version of this application",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println(version)
-		return nil
-	},
-}
-
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(versioncmd.New(version))
 }
