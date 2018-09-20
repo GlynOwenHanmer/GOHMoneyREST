@@ -39,14 +39,14 @@ pipeline:
   build-monserve-binary:
     image: golang:1.10.4
     commands:
-      - make binary APP_NAME=monserve VERSION_VAR=dummy.dummy
+      - make binary APP_NAME=monserve VERSION_VAR=main.version
   
   build-monserve-image:
     image: docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     commands:
-      - docker build --tag monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA} .
+      - docker build --build-arg APP_NAME=monserve --tag monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA} .
   
   build-monserve-client-functional-tests-binary:
     image: golang:1.10.4
