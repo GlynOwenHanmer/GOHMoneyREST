@@ -25,15 +25,14 @@ clean:
 	rm $(BUILD_DIR)/*
 
 monserve: APP_NAME = monserve
-export APP_NAME VERSION_VAR
-monserve: binary monserve-image
+monserve: VERSION_VAR = main.version
+monserve: binary test-binary-version-output monserve-image
 
 monserve-image:
 	docker build --tag $(SERVE_NAME):$(VERSION) .
 
 moncli: APP_NAME = moncli
 moncli: VERSION_VAR = github.com/glynternet/mon/cmd/moncli/cmd.version
-export APP_NAME VERSION_VAR
 moncli: binary test-binary-version-output
 
 binary:

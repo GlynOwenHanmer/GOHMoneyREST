@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -19,5 +19,5 @@ var versionCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	cmdDBServe.AddCommand(versionCmd)
 }
