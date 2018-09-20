@@ -24,12 +24,15 @@ clean:
 monserve: monserve-binary monserve-image
 
 monserve-binary:
-	$(GOBUILD_CMD) -o bin/$(SERVE_NAME) ./cmd/$(SERVE_NAME)
+	$(MAKE) binary APP_NAME=monserve
 
 monserve-image:
 	docker build --tag $(SERVE_NAME):$(VERSION) .
 
-moncli: build-moncli
+moncli: moncli-binary
 
-build-moncli:
-	$(GOBUILD_CMD) -o bin/$(CLI_NAME) ./cmd/$(CLI_NAME)
+moncli-binary:
+	$(MAKE) binary APP_NAME=moncli
+
+binary:
+	$(GOBUILD_CMD) -o bin/$(APP_NAME) ./cmd/$(APP_NAME)
