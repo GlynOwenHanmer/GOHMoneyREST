@@ -1,7 +1,7 @@
 VERSION ?= $(shell git describe --tags --dirty --always)
-LDFLAGS = "-w -X main.Version=$(VERSION)"
 
-GOBUILDFLAGS ?= -installsuffix cgo -a -ldflags $(LDFLAGS)
+LDFLAGS = -ldflags "-w -X github.com/glynternet/mon/cmd/moncli/cmd.version=$(VERSION)"
+GOBUILDFLAGS ?= -installsuffix cgo -a $(LDFLAGS)
 
 SERVE_NAME = monserve
 CLI_NAME = moncli
