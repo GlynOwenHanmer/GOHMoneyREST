@@ -1,7 +1,12 @@
 VERSION ?= $(shell git describe --tags --dirty --always)
-LDFLAGS = "-w -X main.Version=$(VERSION)"
 
-GOBUILDFLAGS ?= -installsuffix cgo -a -ldflags $(LDFLAGS)
+BUILD_DIR ?= ./bin
+
+VERSION_VAR ?= dummyval.dummyval
+LDFLAGS = -ldflags "-w -X $(VERSION_VAR)=$(VERSION)"
+GOBUILD_FLAGS ?= -installsuffix cgo -a $(LDFLAGS)
+GOBUILD_ENVVARS ?= CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH)
+GOBUILD_CMD ?= $(GOBUILD_ENVVARS) go build $(GOBUILD_FLAGS)
 
 SERVE_NAME = monserve
 CLI_NAME = moncli
@@ -14,20 +19,26 @@ all: build install clean
 build: monserve moncli
 
 install:
-	cp -v ./bin/* $(GOPATH)/bin/
+	cp -v $(BUILD_DIR)/* $(GOPATH)/bin/
 
 clean:
-	rm ./bin/*
+	rm $(BUILD_DIR)/*
 
-monserve: monserve-binary monserve-image
-
-monserve-binary:
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build $(GOBUILDFLAGS) -o bin/$(SERVE_NAME) ./cmd/$(SERVE_NAME)
+monserve: APP_NAME = monserve
+monserve: VERSION_VAR = main.version
+monserve: binary test-binary-version-output monserve-image
 
 monserve-image:
 	docker build --tag $(SERVE_NAME):$(VERSION) .
 
-moncli: build-moncli
+moncli: APP_NAME = moncli
+moncli: VERSION_VAR = github.com/glynternet/mon/cmd/moncli/cmd.version
+moncli: binary test-binary-version-output
 
-build-moncli:
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build $(GOBUILDFLAGS) -o bin/$(CLI_NAME) ./cmd/$(CLI_NAME)
+binary:
+	$(GOBUILD_CMD) -o $(BUILD_DIR)/$(APP_NAME) ./cmd/$(APP_NAME)
+
+test-binary-version-output: VERSION_CMD ?= $(BUILD_DIR)/$(APP_NAME) version
+test-binary-version-output:
+	@echo testing output of $(VERSION_CMD)
+	test "$(shell $(VERSION_CMD))" = "$(VERSION)" && echo PASSED
