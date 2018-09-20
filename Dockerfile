@@ -1,5 +1,7 @@
 FROM scratch
 
-COPY ./bin/monserve /
+ARG APP_NAME
 
-CMD ["/monserve"]
+COPY ./bin/$APP_NAME /app
+
+ENTRYPOINT [ "/app" ]

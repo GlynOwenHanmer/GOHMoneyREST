@@ -23,19 +23,15 @@ clean:
 
 monserve:
 	$(MAKE) cmd-all \
-		APP_NAME=$(SERVE_NAME) \
+		APP_NAME=monserve \
 		VERSION_VAR=main.version
-	$(MAKE) monserve-image SERVE_NAME=monserve
-
-monserve-image:
-	docker build --tag $(SERVE_NAME):$(VERSION) .
 
 moncli:
 	$(MAKE) cmd-all \
 		APP_NAME=moncli \
 		VERSION_VAR=github.com/glynternet/mon/cmd/moncli/cmd.version
 
-cmd-all: binary test-binary-version-output
+cmd-all: binary test-binary-version-output image
 
 binary:
 	$(GOBUILD_CMD) -o $(BUILD_DIR)/$(APP_NAME) ./cmd/$(APP_NAME)
@@ -44,3 +40,9 @@ test-binary-version-output: VERSION_CMD ?= $(BUILD_DIR)/$(APP_NAME) version
 test-binary-version-output:
 	@echo testing output of $(VERSION_CMD)
 	test "$(shell $(VERSION_CMD))" = "$(VERSION)" && echo PASSED
+
+image:
+	docker build \
+	--tag $(APP_NAME):$(VERSION) \
+	--build-arg APP_NAME=$(APP_NAME) \
+	.
