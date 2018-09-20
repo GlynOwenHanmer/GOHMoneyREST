@@ -38,3 +38,7 @@ moncli-binary:
 
 binary:
 	$(GOBUILD_CMD) -o $(BUILD_DIR)/$(APP_NAME) ./cmd/$(APP_NAME)
+
+OUT = $(shell $(BUILD_DIR)/moncli version)
+test-moncli-binary-version:
+	test "$(OUT)" = "$(VERSION)" && echo PASSED || echo FAILED
