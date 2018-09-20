@@ -39,7 +39,7 @@ pipeline:
   build-monserve-binary:
     image: golang:1.10.4
     commands:
-      - make monserve-binary
+      - make binary APP_NAME=monserve VERSION_VAR=dummy.dummy
   
   build-monserve-image:
     image: docker
