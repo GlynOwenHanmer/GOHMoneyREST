@@ -1,7 +1,9 @@
 VERSION ?= $(shell git describe --tags --dirty --always)
 
 LDFLAGS = -ldflags "-w -X github.com/glynternet/mon/cmd/moncli/cmd.version=$(VERSION)"
-GOBUILDFLAGS ?= -installsuffix cgo -a $(LDFLAGS)
+GOBUILD_FLAGS ?= -installsuffix cgo -a $(LDFLAGS)
+GOBUILD_ENVVARS ?= CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH)
+GOBUILD_CMD ?= $(GOBUILD_ENVVARS) go build $(GOBUILD_FLAGS)
 
 SERVE_NAME = monserve
 CLI_NAME = moncli
@@ -22,7 +24,7 @@ clean:
 monserve: monserve-binary monserve-image
 
 monserve-binary:
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build $(GOBUILDFLAGS) -o bin/$(SERVE_NAME) ./cmd/$(SERVE_NAME)
+	$(GOBUILD_CMD) -o bin/$(SERVE_NAME) ./cmd/$(SERVE_NAME)
 
 monserve-image:
 	docker build --tag $(SERVE_NAME):$(VERSION) .
@@ -30,4 +32,4 @@ monserve-image:
 moncli: build-moncli
 
 build-moncli:
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build $(GOBUILDFLAGS) -o bin/$(CLI_NAME) ./cmd/$(CLI_NAME)
+	$(GOBUILD_CMD) -o bin/$(CLI_NAME) ./cmd/$(CLI_NAME)
