@@ -1,12 +1,16 @@
 builds:
 - binary: moncli
-  main: ./cmd/moncli/main.go
+  ldflags:
+     - -w -X github.com/glynternet/mon/cmd/moncli/cmd.version={{.Version}}
+  main: ./cmd/moncli
   env:
   - CGO_ENABLED=0
   goarch:
     - amd64
 - binary: monserve
-  main: ./cmd/monserve/main.go
+  ldflags:
+     - -w -X main.version={{.Version}}
+  main: ./cmd/monserve
   env:
   - CGO_ENABLED=0
   goarch:
