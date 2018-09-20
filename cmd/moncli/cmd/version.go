@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/glynternet/mon/internal/versioncmd"
 )
 
@@ -8,5 +10,5 @@ import (
 var version = "unknown"
 
 func init() {
-	rootCmd.AddCommand(versioncmd.New(version))
+	rootCmd.AddCommand(versioncmd.New(version, os.Stdout))
 }
