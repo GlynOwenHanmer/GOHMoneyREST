@@ -8,15 +8,12 @@ GOBUILD_FLAGS ?= -installsuffix cgo -a $(LDFLAGS)
 GOBUILD_ENVVARS ?= CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH)
 GOBUILD_CMD ?= $(GOBUILD_ENVVARS) go build $(GOBUILD_FLAGS)
 
-SERVE_NAME = monserve
-CLI_NAME = moncli
-
 OS ?= linux
 ARCH ?= amd64
 
 all: build install clean
 
-build: monserve moncli
+build: moncli monserve
 
 install:
 	cp -v $(BUILD_DIR)/* $(GOPATH)/bin/
@@ -24,16 +21,21 @@ install:
 clean:
 	rm $(BUILD_DIR)/*
 
-monserve: APP_NAME = monserve
-monserve: VERSION_VAR = main.version
-monserve: binary test-binary-version-output monserve-image
+monserve:
+	$(MAKE) cmd-all \
+		APP_NAME=$(SERVE_NAME) \
+		VERSION_VAR=main.version
+	$(MAKE) monserve-image SERVE_NAME=monserve
 
 monserve-image:
 	docker build --tag $(SERVE_NAME):$(VERSION) .
 
-moncli: APP_NAME = moncli
-moncli: VERSION_VAR = github.com/glynternet/mon/cmd/moncli/cmd.version
-moncli: binary test-binary-version-output
+moncli:
+	$(MAKE) cmd-all \
+		APP_NAME=moncli \
+		VERSION_VAR=github.com/glynternet/mon/cmd/moncli/cmd.version
+
+cmd-all: binary test-binary-version-output
 
 binary:
 	$(GOBUILD_CMD) -o $(BUILD_DIR)/$(APP_NAME) ./cmd/$(APP_NAME)
