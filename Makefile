@@ -11,15 +11,7 @@ GOBUILD_CMD ?= $(GOBUILD_ENVVARS) go build $(GOBUILD_FLAGS)
 OS ?= linux
 ARCH ?= amd64
 
-all: build install clean
-
 build: moncli monserve
-
-install:
-	cp -v $(BUILD_DIR)/* $(GOPATH)/bin/
-
-clean:
-	rm $(BUILD_DIR)/*
 
 monserve:
 	$(MAKE) cmd-all \
