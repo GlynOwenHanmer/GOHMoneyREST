@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/glynternet/mon/internal/router"
@@ -26,7 +27,10 @@ const (
 )
 
 func main() {
-	log.Fatal(cmdDBServe.Execute())
+	if err := cmdDBServe.Execute(); err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
 }
 
 func init() {
