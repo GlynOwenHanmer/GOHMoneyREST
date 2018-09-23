@@ -21,7 +21,7 @@ pipeline:
   build-storage-postgres-functional-tests-binary:
     image: golang:1.10.4
     commands:
-      - make -C pkg/storage/postgres/test/functional build-tests
+      - make -C pkg/storage/postgres/test/functional build-tests-binary
 
   run-storage-postgres-functional-tests:
     image: docker/compose:1.21.2
