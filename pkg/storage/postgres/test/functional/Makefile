@@ -7,6 +7,13 @@ PROJECT_NAME ?= $(REPO_NAME)-functional-test
 
 VERSION ?= $(shell git describe --tags --dirty --always)
 
+TESTS_IMAGE_NAME ?= mon-pkg-storage-postgres-functional-tests
+TESTS_IMAGE_TAG ?= $(VERSION)
+TESTS_IMAGE ?= $(TESTS_IMAGE_NAME):$(TESTS_IMAGE_TAG)
+COMPOSE_ENV_VARS ?= 	TESTS_IMAGE_NAME=$(TESTS_IMAGE_NAME) \
+					TESTS_IMAGE=$(TESTS_IMAGE)
+COMPOSE_CMD ?= $(COMPOSE_ENV_VARS) docker-compose
+
 OS ?= linux
 ARCH ?= amd64
 
@@ -26,7 +33,14 @@ test:
 	$(MAKE) docker-compose-up
 
 docker-compose-up:
-	docker-compose --project-name $(PROJECT_NAME) up --build --abort-on-container-exit --force-recreate
+	$(COMPOSE_CMD) \
+		--project-name $(PROJECT_NAME) \
+		up \
+		--build \
+		--abort-on-container-exit \
+		--force-recreate
 
 docker-compose-down:
-	docker-compose --project-name $(PROJECT_NAME) down
+	$(COMPOSE_CMD) \
+		--project-name $(PROJECT_NAME) \
+		down
