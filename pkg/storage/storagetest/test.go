@@ -27,7 +27,7 @@ func Test(t *testing.T, store storage.Storage) {
 			run:   insertAndRetrieveAccounts,
 		},
 		{
-			title: "inserting balances",
+			title: "inserting and retrieving balances",
 			run:   insertAndRetrieveBalances,
 		},
 		{
@@ -147,39 +147,29 @@ func insertAndRetrieveBalances(t *testing.T, store storage.Storage) {
 	as := selectAccounts(t, store)
 	assert.Len(t, *as, numOfAccounts)
 
-	type accountBalances struct {
-		storage.Account
-		storage.Balances
-	}
-
-	abs := make([]accountBalances, numOfAccounts)
-	for i, a := range *as {
+	// assert that all accounts contain no balances
+	for _, a := range *as {
 		bs, err := store.SelectAccountBalances(a)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 0)
-		abs[i] = accountBalances{
-			Account:  (*as)[i],
-			Balances: *bs,
-		}
 	}
 
 	for i := 0; i < numOfAccounts; i++ {
-		b := newTestBalance(t, abs[i].Account.Account.Opened())
-		inserted, err := store.InsertBalance(abs[i].Account, b)
+		b := newTestBalance(t, (*as)[i].Account.Opened())
+		inserted, err := store.InsertBalance((*as)[i], b)
 		common.FatalIfError(t, err, "inserting Balance")
 		equal := b.Equal(inserted.Balance)
 		if !assert.True(t, equal) {
 			t.FailNow()
 		}
 
-		bs, err := store.SelectAccountBalances(abs[i].Account)
+		bs, err := store.SelectAccountBalances((*as)[i])
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 1)
-		abs[i].Balances = *bs
 
-		invalidBalance, err := balance.New(abs[i].Account.Account.Opened().Add(-time.Second))
+		invalidBalance, err := balance.New((*as)[i].Account.Opened().Add(-time.Second))
 		common.FatalIfError(t, err, "creating new invalid Balance")
-		inserted, err = store.InsertBalance(abs[i].Account, *invalidBalance)
+		inserted, err = store.InsertBalance((*as)[i], *invalidBalance)
 		if !assert.Error(t, err, "inserting Balance") {
 			t.FailNow()
 		}
