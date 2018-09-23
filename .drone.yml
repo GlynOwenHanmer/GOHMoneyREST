@@ -21,15 +21,15 @@ pipeline:
   build-storage-postgres-functional-tests-binary:
     image: golang:1.10.4
     commands:
-      - make -C pkg/storage/postgres/test/functional build-tests
+      - make -C pkg/storage/postgres/test/functional build-tests-binary
 
   run-storage-postgres-functional-tests:
     image: docker/compose:1.21.2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - FUNCTIONAL_TESTS_IMAGE_NAME=mon-pkg-storage-postgres-functional-tests
-      - FUNCTIONAL_TESTS_IMAGE_TAG=${DRONE_COMMIT_SHA:-NO_SHA}
+      - TESTS_IMAGE_NAME=mon-pkg-storage-postgres-functional-tests
+      - TESTS_IMAGE=mon-pkg-storage-postgres-functional-tests:${DRONE_COMMIT_SHA:-NO_SHA}
     commands:
       - cd pkg/storage/postgres/test/functional
       - docker-compose --project-name mon-pkg-storage-postgres-functional-test down

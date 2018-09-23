@@ -13,8 +13,8 @@ services:
       POSTGRES_PASSWORD: ""
       POSTGRES_USER: postgres
   functional-tests:
-    container_name: ${FUNCTIONAL_TESTS_IMAGE_NAME}
-    image: ${FUNCTIONAL_TESTS_IMAGE_NAME}:${FUNCTIONAL_TESTS_IMAGE_TAG}
+    container_name: ${TESTS_IMAGE_NAME}
+    image: ${TESTS_IMAGE}
     build:
       context: .
       dockerfile: tests.Dockerfile
