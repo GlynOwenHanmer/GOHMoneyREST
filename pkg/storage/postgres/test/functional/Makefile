@@ -5,8 +5,7 @@ TEST_BIN_NAME ?= functional.test
 
 PROJECT_NAME ?= $(REPO_NAME)-functional-test
 
-VERSION ?= $(shell git describe --tags --always)
-LDFLAGS = "-w -X main.Version=$(VERSION)"
+VERSION ?= $(shell git describe --tags --dirty --always)
 
 OS ?= linux
 ARCH ?= amd64
@@ -21,7 +20,7 @@ clean:
 	$(MAKE) docker-compose-down
 
 build-tests:
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go test -tags 'functional' -c -o ./bin/$(TEST_BIN_NAME) -installsuffix cgo -a -ldflags $(LDFLAGS)
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go test -tags 'functional' -c -o ./bin/$(TEST_BIN_NAME) -installsuffix cgo -a
 
 test:
 	$(MAKE) docker-compose-up
