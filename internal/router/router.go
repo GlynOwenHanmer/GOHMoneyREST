@@ -14,7 +14,7 @@ const (
 	EndpointAccounts = "/accounts"
 	patternAccounts  = EndpointAccounts
 
-	// EndpointAccount is the endpoint for Account
+	// EndpointAccount is the base endpoint for single account requests
 	EndpointAccount = "/account"
 
 	// EndpointFmtAccount is the format string for use when generating a
@@ -33,7 +33,11 @@ const (
 	EndpointFmtAccountUpdate = EndpointFmtAccount + "/update"
 	patternAccountUpdate     = patternAccount + "/update"
 
+	// EndpointBalance is the base endpoint for single balance requests
 	EndpointBalance    = "/balance"
+
+	// EndpointFmtBalance is the format string for generating single balance
+	// request endpoints
 	EndpointFmtBalance = EndpointBalance + "/%d"
 	patternBalance     = EndpointBalance + "/{id}"
 
