@@ -54,6 +54,9 @@ func (s *Storage) InsertBalance(storage.Account, balance.Balance) (*storage.Bala
 	return s.Balance, s.BalanceErr
 }
 
+// DeleteBalance stubs the storage.DeleteBalance method
+func (s *Storage) DeleteBalance(_ uint) error { return s.Err }
+
 // SelectAccountBalances stubs the storage.SelectAccountBalances method
 func (s *Storage) SelectAccountBalances(storage.Account) (*storage.Balances, error) {
 	return s.Balances, s.BalancesErr

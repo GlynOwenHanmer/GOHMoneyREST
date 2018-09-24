@@ -28,7 +28,7 @@ func Test(t *testing.T, store storage.Storage) {
 		},
 		{
 			title: "inserting and retrieving balances",
-			run:   insertAndRetrieveBalances,
+			run:   insertDeleteAndRetrieveBalances,
 		},
 		{
 			title: "update account",
@@ -143,7 +143,7 @@ func assertThreeAccountsEqual(t *testing.T, a, b, c *storage.Account) {
 	}
 }
 
-func insertAndRetrieveBalances(t *testing.T, store storage.Storage) {
+func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 	as := selectAccounts(t, store)
 	assert.Len(t, *as, numOfAccounts)
 
@@ -155,6 +155,7 @@ func insertAndRetrieveBalances(t *testing.T, store storage.Storage) {
 	}
 
 	for i := 0; i < numOfAccounts; i++ {
+		// insert single balance
 		b := newTestBalance(t, (*as)[i].Account.Opened())
 		inserted, err := store.InsertBalance((*as)[i], b)
 		common.FatalIfError(t, err, "inserting Balance")
@@ -167,9 +168,18 @@ func insertAndRetrieveBalances(t *testing.T, store storage.Storage) {
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 1)
 
+		// delete balance
+		err = store.DeleteBalance(inserted.ID)
+		assert.NoError(t, err)
+
+		bs, err = store.SelectAccountBalances((*as)[i])
+		common.FatalIfError(t, err, "selecting account balances")
+		assert.Len(t, *bs, 0)
+
 		invalidBalance, err := balance.New((*as)[i].Account.Opened().Add(-time.Second))
 		common.FatalIfError(t, err, "creating new invalid Balance")
 		inserted, err = store.InsertBalance((*as)[i], *invalidBalance)
+		// fail if no error was returned
 		if !assert.Error(t, err, "inserting Balance") {
 			t.FailNow()
 		}
