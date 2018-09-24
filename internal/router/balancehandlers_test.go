@@ -94,3 +94,25 @@ func TestServer_InsertBalance(t *testing.T) {
 		assert.Equal(t, expected, b)
 	})
 }
+
+func TestServer_DeleteBalance(t *testing.T) {
+	t.Run("DeleteBalance error", func(t *testing.T) {
+		expected := errors.New("DeleteBalance error")
+		srv := environment{storage: &storagetest.Storage{
+			Err: expected,
+		}}
+
+		code, body, err := srv.deleteBalance(0)
+		assert.Equal(t, http.StatusBadRequest, code)
+		assert.Equal(t, expected, errors.Cause(err))
+		assert.Equal(t, "", body)
+	})
+
+	t.Run("all ok", func(t *testing.T) {
+		srv := environment{storage: &storagetest.Storage{}}
+		code, body, err := srv.deleteBalance(0)
+		assert.Nil(t, err)
+		assert.Equal(t, "", body)
+		assert.Equal(t, http.StatusOK, code)
+	})
+}

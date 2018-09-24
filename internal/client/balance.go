@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"fmt"
 
@@ -39,6 +40,19 @@ func (c Client) InsertBalance(a storage.Account, b balance.Balance) (*storage.Ba
 		return nil, errors.Wrapf(err, "posting Balance to endpoint %s", endpoint)
 	}
 	return unmarshalJSONToBalance(bs)
+}
+
+// DeleteBalance deletes a balance at a given id
+func (c Client) DeleteBalance(id uint) error {
+	endpoint := fmt.Sprintf(router.EndpointFmtBalance, id)
+	r, err := c.deleteToEndpoint(endpoint)
+	if err != nil {
+		return errors.Wrapf(err, "deleting balance to endpoint %s", endpoint)
+	}
+	if r.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code %d (%s)", r.StatusCode, http.StatusText(r.StatusCode))
+	}
+	return nil
 }
 
 func (c Client) postBalanceToEndpoint(e string, b balance.Balance) ([]byte, error) {

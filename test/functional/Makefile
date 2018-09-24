@@ -1,7 +1,7 @@
 REPO_NAME ?= mon
 
-DOCKER_IMAGE_TAG ?=
-DOCKER_IMAGE ?= monserve:$(DOCKER_IMAGE_TAG)
+MONSERVE_IMAGE_TAG ?=
+MONSERVE_IMAGE ?= monserve:$(MONSERVE_IMAGE_TAG)
 
 TEST_BIN_NAME ?= functional.test
 
@@ -22,15 +22,19 @@ clean:
 	$(MAKE) docker-compose-down
 
 build-tests:
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go test -tags functional -c -o ./bin/$(TEST_BIN_NAME) -installsuffix cgo -a -ldflags $(LDFLAGS)
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) \
+	go test \
+		-tags functional \
+		-c -o ./bin/$(TEST_BIN_NAME) \
+		-installsuffix cgo -a
 
 test:
 	$(MAKE) docker-compose-up; $(MAKE) docker-compose-down
 
 docker-compose-up:
-	DOCKER_IMAGE=${DOCKER_IMAGE} \
+	MONSERVE_IMAGE=${MONSERVE_IMAGE} \
 	docker-compose --project-name $(PROJECT_NAME) up --build --abort-on-container-exit --force-recreate
 
 docker-compose-down:
-	DOCKER_IMAGE=${DOCKER_IMAGE} \
+	MONSERVE_IMAGE=${MONSERVE_IMAGE} \
 	docker-compose --project-name $(PROJECT_NAME) down

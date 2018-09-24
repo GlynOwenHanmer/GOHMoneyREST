@@ -3,7 +3,7 @@ version: '3.5'
 services:
   
   monserve:
-    image: "${DOCKER_IMAGE}"
+    image: "${MONSERVE_IMAGE}"
     depends_on:
       - postgres
     expose:

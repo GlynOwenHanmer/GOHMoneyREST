@@ -18,5 +18,5 @@ type Storage interface {
 	InsertBalance(a Account, b balance.Balance) (*Balance, error)
 	SelectAccountBalances(Account) (*Balances, error)
 	//UpdateBalance(a Account, b *Balance, us balance.Balance) error
-	//DeleteBalance(a Account, b *Balance) error
+	DeleteBalance(id uint) error
 }

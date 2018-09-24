@@ -48,6 +48,10 @@ var (
 		balancesTable,
 		balancesInsertFields,
 		balancesSelectFields)
+
+	balancesDeleteBalance = fmt.Sprintf(
+		`DELETE FROM %s WHERE id = $1;`,
+		balancesTable)
 )
 
 // SelectAccountBalances returns all Balances for a given Account and any
@@ -90,6 +94,11 @@ func (pg postgres) InsertBalance(a storage.Account, b balance.Balance) (*storage
 	return dbb, errors.Wrap(err, "querying balance")
 }
 
+func (pg postgres) DeleteBalance(id uint) error {
+	_, err := queryBalance(pg.db, balancesDeleteBalance, id)
+	return errors.Wrap(err, "querying balance")
+}
+
 // queryBalance returns an error if more than one result is returned from the query
 // queryBalance may or may not return an error if zero results are returned.
 func queryBalance(db *sql.DB, queryString string, values ...interface{}) (*storage.Balance, error) {
@@ -97,13 +106,13 @@ func queryBalance(db *sql.DB, queryString string, values ...interface{}) (*stora
 	if err != nil {
 		return nil, errors.Wrap(err, "querying balances")
 	}
-	var b *storage.Balance
 	if len(*bs) > 1 {
-		err = errors.New("query returned more than 1 result")
-	} else if bs != nil {
-		b = &(*bs)[0]
+		return nil, errors.New("query returned more than 1 result")
 	}
-	return b, err
+	if bs == nil || len(*bs) == 0 {
+		return nil, nil
+	}
+	return &(*bs)[0], nil
 }
 
 func queryBalances(db *sql.DB, queryString string, values ...interface{}) (*storage.Balances, error) {

@@ -58,7 +58,7 @@ pipeline:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DOCKER_IMAGE=monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA}
+      - MONSERVE_IMAGE=monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA}
     commands:
       - cd test/functional
       - docker-compose --project-name mon-monserve-client-functional-test down
