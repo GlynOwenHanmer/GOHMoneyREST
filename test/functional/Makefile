@@ -22,7 +22,11 @@ clean:
 	$(MAKE) docker-compose-down
 
 build-tests:
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go test -tags functional -c -o ./bin/$(TEST_BIN_NAME) -installsuffix cgo -a -ldflags $(LDFLAGS)
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) \
+	go test \
+		-tags functional \
+		-c -o ./bin/$(TEST_BIN_NAME) \
+		-installsuffix cgo -a
 
 test:
 	$(MAKE) docker-compose-up; $(MAKE) docker-compose-down
