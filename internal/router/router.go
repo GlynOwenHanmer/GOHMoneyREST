@@ -34,7 +34,7 @@ const (
 	patternAccountUpdate     = patternAccount + "/update"
 
 	// EndpointBalance is the base endpoint for single balance requests
-	EndpointBalance    = "/balance"
+	EndpointBalance = "/balance"
 
 	// EndpointFmtBalance is the format string for generating single balance
 	// request endpoints
