@@ -33,6 +33,10 @@ const (
 	EndpointFmtAccountUpdate = EndpointFmtAccount + "/update"
 	patternAccountUpdate     = patternAccount + "/update"
 
+	EndpointBalance    = "/balance"
+	EndpointFmtBalance = EndpointBalance + "/%d"
+	patternBalance     = EndpointBalance + "/{id}"
+
 	// EndpointFmtAccountBalances is the format string for use when generating
 	// the endpoint to get the balances for a specific Account
 	EndpointFmtAccountBalances = EndpointAccount + "/%d/balances"
@@ -115,6 +119,12 @@ func generateRoutes(e environment) []route {
 			pattern:    patternAccountBalanceInsert,
 			appHandler: e.muxAccountBalanceInsertHandlerFunc,
 			method:     http.MethodPost,
+		},
+		{
+			name:       "BalanceDelete",
+			pattern:    patternBalance,
+			appHandler: e.muxBalanceDeleteHandlerFunc,
+			method:     http.MethodDelete,
 		},
 	}
 }
