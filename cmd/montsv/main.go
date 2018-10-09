@@ -276,5 +276,16 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 			Amount: -142, // =-1000/7, Tenner a week
 			from:   now,
 		},
+		// {
+		// 	name: "glynternet.com domain",
+		// 	currencyString: "GBP",
+		// }: yearlyRecurringAmount{
+		// 	Date: {
+		// 		Month: 10,
+		// 		Day: 14
+		// 	},
+		// 	Amount:-1299,
+		// 	from:now
+		// },
 	}
 }
