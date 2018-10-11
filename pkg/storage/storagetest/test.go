@@ -204,7 +204,7 @@ func updateAccounts(t *testing.T, store storage.Storage) {
 			account.CloseTime(time.Now().Add(24*time.Hour).Truncate(time.Second)),
 		)
 
-		updatedA, err := store.UpdateAccount(inserted, updates)
+		updatedA, err := store.UpdateAccount(*inserted, *updates)
 		common.FatalIfError(t, err, "updating account")
 		if !assert.NotNil(t, updatedA) {
 			t.FailNow()
@@ -237,7 +237,7 @@ func updateAccounts(t *testing.T, store storage.Storage) {
 			account.CloseTime(time.Now().Add(200*time.Hour).Truncate(time.Second)),
 		)
 
-		updatedA, err := store.UpdateAccount(inserted, updates)
+		updatedA, err := store.UpdateAccount(*inserted, *updates)
 		common.FatalIfError(t, err, "updating account")
 		assert.Equal(t, updatedA.ID, inserted.ID)
 		assert.True(t,
@@ -268,7 +268,7 @@ func updateAccounts(t *testing.T, store storage.Storage) {
 			account.CloseTime(time.Now().Add(time.Hour).Truncate(time.Second)),
 		)
 
-		updatedA, err := store.UpdateAccount(inserted, updates)
+		updatedA, err := store.UpdateAccount(*inserted, *updates)
 		assert.Error(t, err)
 		assert.Nil(t, updatedA)
 	})

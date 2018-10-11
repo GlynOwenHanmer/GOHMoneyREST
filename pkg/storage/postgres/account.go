@@ -99,8 +99,8 @@ func (pg postgres) InsertAccount(a account.Account) (*storage.Account, error) {
 // UpdateAccount updates a stored account to reflect the details of some other
 // account data. The updates will be verified to ensure that any data to be
 // used will be logically sound with the balances and other account details.
-func (pg postgres) UpdateAccount(a *storage.Account, updates *account.Account) (*storage.Account, error) {
-	bs, err := pg.SelectAccountBalances(*a)
+func (pg postgres) UpdateAccount(a storage.Account, updates account.Account) (*storage.Account, error) {
+	bs, err := pg.SelectAccountBalances(a)
 	if err != nil {
 		return nil, errors.Wrap(err, "selecting Account Balances for update validation")
 	}
@@ -110,16 +110,21 @@ func (pg postgres) UpdateAccount(a *storage.Account, updates *account.Account) (
 			return nil, fmt.Errorf("update would make balance invalid: %v", err)
 		}
 	}
-	dba, err := queryAccount(
+	dba, err := pg.updateAccount(a.ID, updates)
+	return dba, errors.Wrap(err, "updating account")
+}
+
+// updateAccount updates the account at a given id with the values from the given account.Account
+func (pg postgres) updateAccount(id uint, updates account.Account) (*storage.Account, error) {
+	return queryAccount(
 		pg.db,
 		queryUpdateAccount,
 		updates.Name(),
 		updates.Opened(),
 		pq.NullTime(updates.Closed()),
 		updates.CurrencyCode(),
-		a.ID,
+		id,
 	)
-	return dba, errors.Wrap(err, "querying Account")
 }
 
 func (pg postgres) DeleteAccount(id uint) error {

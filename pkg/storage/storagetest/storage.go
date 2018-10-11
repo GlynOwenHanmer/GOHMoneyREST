@@ -36,7 +36,7 @@ func (s *Storage) InsertAccount(account.Account) (*storage.Account, error) {
 }
 
 // UpdateAccount stubs the storage.UpdateAccount method
-func (s *Storage) UpdateAccount(a *storage.Account, updates *account.Account) (*storage.Account, error) {
+func (s *Storage) UpdateAccount(a storage.Account, updates account.Account) (*storage.Account, error) {
 	return s.Account, s.AccountErr
 }
 

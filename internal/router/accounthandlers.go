@@ -101,7 +101,7 @@ func (env *environment) muxAccountUpdateHandlerFunc(r *http.Request) (int, inter
 }
 
 func (env *environment) handlerUpdateAccount(a storage.Account, updates account.Account) (int, interface{}, error) {
-	updated, err := env.storage.UpdateAccount(&a, &updates)
+	updated, err := env.storage.UpdateAccount(a, updates)
 	if err != nil {
 		return http.StatusBadRequest, nil, err
 	}
