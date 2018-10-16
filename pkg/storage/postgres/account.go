@@ -127,11 +127,17 @@ func (pg postgres) updateAccount(id uint, updates account.Account) (*storage.Acc
 	)
 }
 
+// DeleteAccount deletes an account with the given id
 func (pg postgres) DeleteAccount(id uint) error {
 	_, err := pg.SelectAccount(id)
 	if err != nil {
 		return errors.Wrap(err, "selecting account to delete")
 	}
+	return errors.Wrap(pg.deleteAccount(id), "deleting account")
+}
+
+// deleteAccount deletes an account with the given id
+func (pg postgres) deleteAccount(id uint) error {
 	r, err := pg.db.Exec(queryDeleteAccount, time.Now(), id)
 	if err != nil {
 		return errors.Wrap(err, "executing query")
@@ -146,6 +152,9 @@ func (pg postgres) DeleteAccount(id uint) error {
 	return nil
 }
 
+// do not export this function.
+// The use of interface{} here is deemed to be acceptable here because it is only used within the
+// context of this package
 func queryAccount(db *sql.DB, queryString string, values ...interface{}) (*storage.Account, error) {
 	as, err := queryAccounts(db, queryString, values...)
 	if err != nil {

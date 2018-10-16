@@ -90,8 +90,12 @@ func (pg postgres) InsertBalance(a storage.Account, b balance.Balance) (*storage
 	if err != nil {
 		return nil, errors.Wrap(err, "validating balance")
 	}
-	dbb, err := queryBalance(pg.db, balancesInsertBalance, a.ID, b.Date, b.Amount)
-	return dbb, errors.Wrap(err, "querying balance")
+	dbb, err := pg.insertBalance(a.ID, b)
+	return dbb, errors.Wrap(err, "inserting balance")
+}
+
+func (pg postgres) insertBalance(accountID uint, b balance.Balance) (*storage.Balance, error) {
+	return queryBalance(pg.db, balancesInsertBalance, accountID, b.Date, b.Amount)
 }
 
 func (pg postgres) DeleteBalance(id uint) error {
