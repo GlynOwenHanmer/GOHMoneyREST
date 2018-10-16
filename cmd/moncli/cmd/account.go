@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/glynternet/go-accounting/account"
@@ -515,8 +514,4 @@ func init() {
 		}
 		accountCmd.AddCommand(c)
 	}
-}
-
-func parseID(i string) (uint64, error) {
-	return strconv.ParseUint(i, 10, 64)
 }
