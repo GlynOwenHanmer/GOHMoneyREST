@@ -120,7 +120,7 @@ func TestClient_SelectAccountBalances(t *testing.T) {
 	time.Sleep(time.Millisecond * 10)
 
 	go func() {
-		selected, err := client.SelectAccountBalances(*s.Account) // id doesn't matter when mocking
+		selected, err := client.SelectAccountBalances((*s).Account.ID) // id doesn't matter when mocking
 		assert.NoError(t, err)
 		assert.NotNil(t, selected)
 		assert.Equal(t, s.Balances, selected)
@@ -167,9 +167,14 @@ func TestClient_InsertAccount(t *testing.T) {
 
 func TestClient_InsertBalance(t *testing.T) {
 	expected := &storage.Balance{ID: 293}
+	now := time.Now()
+	account := &storage.Account{
+		Account: *accountingtest.NewAccount(t, "test account", accountingtest.NewCurrencyCode(t, "ABC"), now),
+	}
+	insert := balance.Balance{Date: now}
 
 	s := &storagetest.Storage{
-		Account: &storage.Account{ID: 51},
+		Account: account,
 		Balance: expected,
 	}
 
@@ -183,7 +188,7 @@ func TestClient_InsertBalance(t *testing.T) {
 	time.Sleep(time.Millisecond * 10)
 
 	go func() {
-		inserted, err := client.InsertBalance(storage.Account{}, balance.Balance{})
+		inserted, err := client.InsertBalance(0, insert)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, inserted)
 		close(errCh)

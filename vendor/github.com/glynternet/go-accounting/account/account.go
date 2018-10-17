@@ -106,6 +106,7 @@ func (a Account) validate() (err error) {
 // ValidateBalance first attempts to validate the Account as an entity by itself. If there are any errors with the Account, these errors are returned and the balance is not attempted to be validated against the Account.
 // If the date of the balance is outside of the TimeRange of the Account, a DateOutOfAccountTimeRange will be returned.
 func (a Account) ValidateBalance(b balance.Balance) (err error) {
+	// TODO: the account should not be validated here, only the balance should be
 	err = a.validate()
 	if err != nil {
 		return

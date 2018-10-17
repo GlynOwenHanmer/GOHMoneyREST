@@ -32,7 +32,7 @@ func Test(t *testing.T, store storage.Storage) {
 		},
 		{
 			title: "update account",
-			run:   updateAccounts,
+			run:   updateAccount,
 		},
 		{
 			title: "insert and delete accounts",
@@ -146,23 +146,27 @@ func assertThreeAccountsEqual(t *testing.T, a, b, c *storage.Account) {
 func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 	as := selectAccounts(t, store)
 	assert.Len(t, *as, numOfAccounts)
-
-	// assert that all accounts contain no balances
 	for _, a := range *as {
-		bs, err := store.SelectAccountBalances(a)
+		// assert that all accounts contain no balances
+		bs, err := store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 0)
 
 		// insert single balance
+		// TODO: work out what is best to do here. Unfortunately, due to how
+		// TODO: fine grained that postgres can store times, we cannot just use
+		// TODO: time.Now() or some other fine grained time, as the balance
+		// TODO: that is selected will not have the same time.
+		// By using the a.Account.Opened() here, we know that the time is supported by the storage.
 		b := newTestBalance(t, a.Account.Opened())
-		inserted, err := store.InsertBalance(a, b)
+		inserted, err := store.InsertBalance(a.ID, b)
 		common.FatalIfError(t, err, "inserting Balance")
 		equal := b.Equal(inserted.Balance)
 		if !assert.True(t, equal) {
 			t.FailNow()
 		}
 
-		bs, err = store.SelectAccountBalances(a)
+		bs, err = store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 1)
 
@@ -170,108 +174,40 @@ func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 		err = store.DeleteBalance(inserted.ID)
 		assert.NoError(t, err)
 
-		bs, err = store.SelectAccountBalances(a)
+		bs, err = store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 0)
-
-		invalidBalance, err := balance.New(a.Account.Opened().Add(-time.Second))
-		common.FatalIfError(t, err, "creating new invalid Balance")
-		inserted, err = store.InsertBalance(a, *invalidBalance)
-		// fail if no error was returned
-		if !assert.Error(t, err, "inserting Balance") {
-			t.FailNow()
-		}
-		assert.Nil(t, inserted)
 	}
 }
 
-func updateAccounts(t *testing.T, store storage.Storage) {
+func updateAccount(t *testing.T, store storage.Storage) {
 	initial := accountingtest.NewAccount(t, "A", accountingtest.NewCurrencyCode(t, "YEN"), time.Now())
 
-	t.Run("valid without balances", func(t *testing.T) {
-		inserted, err := store.InsertAccount(*initial)
-		common.FatalIfError(t, err, "inserting account to store")
+	inserted, err := store.InsertAccount(*initial)
+	common.FatalIfError(t, err, "inserting account to store")
 
-		// Here we truncate to the closest second to avoid the issue where
-		// postgres stores times down to only the closest millisecond or so
-		// TODO: Sort out rounding of times logic and document it properly. For
-		// TODO: the moment, it is assumed that accounts won't be updated and
-		// TODO: then compared against their original down to such a fine grain
-		updates := accountingtest.NewAccount(t,
-			"B",
-			accountingtest.NewCurrencyCode(t, "GBP"),
-			time.Now().Truncate(time.Second),
-			account.CloseTime(time.Now().Add(24*time.Hour).Truncate(time.Second)),
-		)
+	// Here we truncate to the closest second to avoid the issue where
+	// postgres stores times down to only the closest millisecond or so
+	// TODO: Sort out rounding of times logic and document it properly. For
+	// TODO: the moment, it is assumed that accounts won't be updated and
+	// TODO: then compared against their original down to such a fine grain
+	updates := accountingtest.NewAccount(t,
+		"B",
+		accountingtest.NewCurrencyCode(t, "GBP"),
+		time.Now().Truncate(time.Second),
+		account.CloseTime(time.Now().Add(24*time.Hour).Truncate(time.Second)),
+	)
 
-		updatedA, err := store.UpdateAccount(inserted, updates)
-		common.FatalIfError(t, err, "updating account")
-		if !assert.NotNil(t, updatedA) {
-			t.FailNow()
-		}
-		assert.Equal(t, updatedA.ID, inserted.ID)
-		assert.True(t,
-			updatedA.Account.Equal(*updates),
-			"inserted: %+v\nupdates: %+v\nupdatedA: %+v", inserted.Account, updates, updatedA.Account,
-		)
-	})
-
-	t.Run("valid with balances", func(t *testing.T) {
-		inserted, err := store.InsertAccount(*initial)
-		common.FatalIfError(t, err, "inserting account to store")
-
-		for _, b := range newTestBalances(t, 10, inserted.Account.Opened(), time.Hour) {
-			_, err := store.InsertBalance(*inserted, b)
-			common.FatalIfError(t, err, "inserting balance")
-		}
-
-		// Here we truncate to the closest second to avoid the issue where
-		// postgres stores times down to only the closest millisecond or so
-		// TODO: Sort out rounding of times logic and document it properly. For
-		// TODO: the moment, it is assumed that accounts won't be updated and
-		// TODO: then compared against their original down to such a fine grain
-		updates := accountingtest.NewAccount(t,
-			"B",
-			accountingtest.NewCurrencyCode(t, "GBP"),
-			time.Now().Add(-time.Hour).Truncate(time.Second),
-			account.CloseTime(time.Now().Add(200*time.Hour).Truncate(time.Second)),
-		)
-
-		updatedA, err := store.UpdateAccount(inserted, updates)
-		common.FatalIfError(t, err, "updating account")
-		assert.Equal(t, updatedA.ID, inserted.ID)
-		assert.True(t,
-			updatedA.Account.Equal(*updates),
-			"inserted: %+v\nupdates: %+v\nupdatedA: %+v",
-			inserted.Account, updates, updatedA.Account,
-		)
-	})
-
-	t.Run("invalid with balances", func(t *testing.T) {
-		inserted, err := store.InsertAccount(*initial)
-		common.FatalIfError(t, err, "inserting account to store")
-
-		for _, b := range newTestBalances(t, 10, inserted.Account.Opened(), time.Hour) {
-			_, err := store.InsertBalance(*inserted, b)
-			common.FatalIfError(t, err, "inserting balance")
-		}
-
-		// Here we truncate to the closest second to avoid the issue where
-		// postgres stores times down to only the closest millisecond or so
-		// TODO: Sort out rounding of times logic and document it properly. For
-		// TODO: the moment, it is assumed that accounts won't be updated and
-		// TODO: then compared against their original down to such a fine grain
-		updates := accountingtest.NewAccount(t,
-			"B",
-			accountingtest.NewCurrencyCode(t, "GBP"),
-			time.Now().Add(-time.Hour).Truncate(time.Second),
-			account.CloseTime(time.Now().Add(time.Hour).Truncate(time.Second)),
-		)
-
-		updatedA, err := store.UpdateAccount(inserted, updates)
-		assert.Error(t, err)
-		assert.Nil(t, updatedA)
-	})
+	updatedA, err := store.UpdateAccount(inserted.ID, *updates)
+	common.FatalIfError(t, err, "updating account")
+	if !assert.NotNil(t, updatedA) {
+		t.FailNow()
+	}
+	assert.Equal(t, updatedA.ID, inserted.ID)
+	assert.True(t,
+		updatedA.Account.Equal(*updates),
+		"inserted: %+v\nupdates: %+v\nupdatedA: %+v", inserted.Account, updates, updatedA.Account,
+	)
 }
 
 func insertAndDeleteAccounts(t *testing.T, store storage.Storage) {
@@ -283,7 +219,7 @@ func insertAndDeleteAccounts(t *testing.T, store storage.Storage) {
 	}
 	var abs []AccountBalances
 	for _, a := range *selectedBefore {
-		bs, err := store.SelectAccountBalances(a)
+		bs, err := store.SelectAccountBalances(a.ID)
 		if err != nil {
 			t.Fatal(errors.Wrapf(err, "selecting account balances for account %+v", a))
 		}
@@ -315,17 +251,6 @@ func insertAndDeleteAccounts(t *testing.T, store storage.Storage) {
 			// number that were inserted, then -1 for every delete
 			assert.Len(t, *selectedAfter, len(*selectedBefore)+numInserted-(i+1))
 		})
-
-		t.Run("deleting same account should return error", func(t *testing.T) {
-			err := store.DeleteAccount(a.ID)
-			if err == nil {
-				t.Fatal("expected an error but received nil when deleting same account id again")
-			}
-			selectedAfter = selectAccounts(t, store)
-			// Accounts count should be the number of originals, with the
-			// number that were inserted, then -1 for every delete
-			assert.Len(t, *selectedAfter, len(*selectedBefore)+numInserted-(i+1))
-		})
 	}
 
 	t.Run("previously existing accounts should remain the same", func(t *testing.T) {
@@ -335,7 +260,7 @@ func insertAndDeleteAccounts(t *testing.T, store storage.Storage) {
 		for i := range *selectedAfter {
 			afterAccount := (*selectedAfter)[i]
 			assert.Equal(t, afterAccount, abs[i].Account)
-			afters, err := store.SelectAccountBalances(afterAccount)
+			afters, err := store.SelectAccountBalances(afterAccount.ID)
 			if err != nil {
 				t.Fatal(errors.Wrapf(err, "selecting account balances for account %+v", afterAccount))
 			}
@@ -354,14 +279,4 @@ func newTestBalance(t *testing.T, time time.Time, os ...balance.Option) balance.
 	b, err := balance.New(time, os...)
 	common.FatalIfError(t, err, "creating test balance")
 	return *b
-}
-
-func newTestBalances(
-	t *testing.T, count int, start time.Time, interval time.Duration, os ...balance.Option,
-) []balance.Balance {
-	bs := make([]balance.Balance, count)
-	for i := 0; i < count; i++ {
-		bs[i] = newTestBalance(t, start.Add(time.Duration(i)*interval), os...)
-	}
-	return bs
 }

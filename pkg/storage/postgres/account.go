@@ -96,37 +96,21 @@ func (pg postgres) InsertAccount(a account.Account) (*storage.Account, error) {
 	return dba, errors.Wrap(err, "querying Account")
 }
 
-// UpdateAccount updates a stored account to reflect the details of some other
-// account data. The updates will be verified to ensure that any data to be
-// used will be logically sound with the balances and other account details.
-func (pg postgres) UpdateAccount(a *storage.Account, updates *account.Account) (*storage.Account, error) {
-	bs, err := pg.SelectAccountBalances(*a)
-	if err != nil {
-		return nil, errors.Wrap(err, "selecting Account Balances for update validation")
-	}
-	for _, b := range *bs {
-		err := updates.ValidateBalance(b.Balance)
-		if err != nil {
-			return nil, fmt.Errorf("update would make balance invalid: %v", err)
-		}
-	}
-	dba, err := queryAccount(
+// UpdateAccount updates the account at a given id with the values from the given account.Account
+func (pg postgres) UpdateAccount(id uint, updates account.Account) (*storage.Account, error) {
+	return queryAccount(
 		pg.db,
 		queryUpdateAccount,
 		updates.Name(),
 		updates.Opened(),
 		pq.NullTime(updates.Closed()),
 		updates.CurrencyCode(),
-		a.ID,
+		id,
 	)
-	return dba, errors.Wrap(err, "querying Account")
 }
 
+// DeleteAccount deletes an account with the given id
 func (pg postgres) DeleteAccount(id uint) error {
-	_, err := pg.SelectAccount(id)
-	if err != nil {
-		return errors.Wrap(err, "selecting account to delete")
-	}
 	r, err := pg.db.Exec(queryDeleteAccount, time.Now(), id)
 	if err != nil {
 		return errors.Wrap(err, "executing query")
@@ -141,6 +125,9 @@ func (pg postgres) DeleteAccount(id uint) error {
 	return nil
 }
 
+// do not export this function.
+// The use of interface{} here is deemed to be acceptable here because it is only used within the
+// context of this package
 func queryAccount(db *sql.DB, queryString string, values ...interface{}) (*storage.Account, error) {
 	as, err := queryAccounts(db, queryString, values...)
 	if err != nil {

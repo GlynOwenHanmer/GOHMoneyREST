@@ -3,7 +3,9 @@ package router
 import (
 	"net/http"
 	"testing"
+	"time"
 
+	"github.com/glynternet/go-accounting/accountingtest"
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/glynternet/mon/pkg/storage/storagetest"
@@ -69,14 +71,20 @@ func TestServer_InsertBalance(t *testing.T) {
 		assert.Nil(t, b)
 	})
 
+	now := time.Now()
+	account := &storage.Account{
+		Account: *accountingtest.NewAccount(t, "test account", accountingtest.NewCurrencyCode(t, "ABC"), now),
+	}
+	balance := balance.Balance{Date: now}
+
 	t.Run("InsertBalance error", func(t *testing.T) {
 		expected := errors.New("InsertBalance error")
 		srv := environment{&storagetest.Storage{
-			Account:    &storage.Account{},
+			Account:    account,
 			BalanceErr: expected,
 		}}
-		code, b, err := srv.insertBalance(0, balance.Balance{})
-		assert.Equal(t, expected, errors.Cause(err))
+		code, b, err := srv.insertBalance(0, balance)
+		assert.Equal(t, expected, errors.Cause(err), "Actual error: %+v", err)
 		assert.Contains(t, err.Error(), "inserting balance")
 		assert.Equal(t, http.StatusBadRequest, code)
 		assert.Nil(t, b)
@@ -85,10 +93,10 @@ func TestServer_InsertBalance(t *testing.T) {
 	t.Run("all ok", func(t *testing.T) {
 		expected := &storage.Balance{}
 		srv := environment{&storagetest.Storage{
-			Account: &storage.Account{},
+			Account: account,
 			Balance: expected,
 		}}
-		code, b, err := srv.insertBalance(0, balance.Balance{})
+		code, b, err := srv.insertBalance(0, balance)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, code)
 		assert.Equal(t, expected, b)

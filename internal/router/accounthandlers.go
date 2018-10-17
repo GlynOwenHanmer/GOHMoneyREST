@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/glynternet/go-accounting/account"
+	"github.com/glynternet/mon/internal/model"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -101,7 +102,7 @@ func (env *environment) muxAccountUpdateHandlerFunc(r *http.Request) (int, inter
 }
 
 func (env *environment) handlerUpdateAccount(a storage.Account, updates account.Account) (int, interface{}, error) {
-	updated, err := env.storage.UpdateAccount(&a, &updates)
+	updated, err := model.UpdateAccount(env.storage, a, updates)
 	if err != nil {
 		return http.StatusBadRequest, nil, err
 	}
@@ -117,7 +118,7 @@ func (env *environment) muxAccountDeleteHandlerFunc(r *http.Request) (int, inter
 }
 
 func (env *environment) handlerDeleteAccount(id uint) (int, interface{}, error) {
-	err := env.storage.DeleteAccount(id)
+	err := model.DeleteAccount(env.storage, id)
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrapf(err, "deleting Account with id:%d from storage", id)
 	}

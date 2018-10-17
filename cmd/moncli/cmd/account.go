@@ -121,7 +121,7 @@ var accountOpenCmd = &cobra.Command{
 			return errors.Wrap(err, "inserting new account")
 		}
 
-		b, err := c.InsertBalance(*i, balance.Balance{
+		b, err := c.InsertBalance((*i).ID, balance.Balance{
 			Date:   i.Account.Opened(),
 			Amount: viper.GetInt(keyOpeningBalance),
 		})
@@ -161,7 +161,7 @@ var accountReopenCmd = &cobra.Command{
 			return errors.Wrap(err, "creating updates account from selected account")
 		}
 
-		b, err := c.UpdateAccount(a, us)
+		b, err := c.UpdateAccount(a.ID, *us)
 		if err != nil {
 			return errors.Wrap(err, "applying updates")
 		}
@@ -222,7 +222,7 @@ var accountCloseCmd = &cobra.Command{
 			return errors.Wrap(err, "selecting account")
 		}
 
-		b, err := c.InsertBalance(*a, balance.Balance{
+		b, err := c.InsertBalance((*a).ID, balance.Balance{
 			Date:   closed,
 			Amount: viper.GetInt(keyClosingBalance),
 		})
@@ -240,7 +240,7 @@ var accountCloseCmd = &cobra.Command{
 			return errors.Wrap(err, "creating updates account")
 		}
 
-		u, err := c.UpdateAccount(a, us)
+		u, err := c.UpdateAccount(a.ID, *us)
 		if err != nil {
 			return errors.Wrap(err, "updating account")
 		}
@@ -292,7 +292,7 @@ the same as the original account`,
 			return errors.Wrap(err, "creating account for update")
 		}
 
-		u, err := c.UpdateAccount(a, us)
+		u, err := c.UpdateAccount(a.ID, *us)
 		if err != nil {
 			return errors.Wrap(err, "updating account")
 		}
@@ -337,7 +337,7 @@ var accountRenameCmd = &cobra.Command{
 			return errors.Wrap(err, "creating new account for update")
 		}
 
-		u, err := c.UpdateAccount(a, us)
+		u, err := c.UpdateAccount(a.ID, *us)
 		if err != nil {
 			return errors.Wrap(err, "updating account")
 		}
@@ -368,7 +368,7 @@ var accountBalancesCmd = &cobra.Command{
 
 		table.Accounts(storage.Accounts{*a}, os.Stdout)
 
-		bs, err := c.SelectAccountBalances(*a)
+		bs, err := c.SelectAccountBalances((*a).ID)
 		if err != nil {
 			return errors.Wrap(err, "selecting account balances")
 		}
@@ -407,7 +407,7 @@ var accountBalanceInsertCmd = &cobra.Command{
 			t = *balanceDate.Time
 		}
 
-		b, err := c.InsertBalance(*a, balance.Balance{
+		b, err := c.InsertBalance((*a).ID, balance.Balance{
 			Date:   t,
 			Amount: viper.GetInt(keyAmount),
 		})
@@ -451,7 +451,7 @@ var accountBalanceCmd = &cobra.Command{
 }
 
 func accountBalanceAtTime(store storage.Storage, a storage.Account, at time.Time) (balance.Balance, error) {
-	bs, err := store.SelectAccountBalances(a)
+	bs, err := store.SelectAccountBalances(a.ID)
 	if err != nil {
 		return balance.Balance{}, errors.Wrapf(err, "selecting balances for account: %+v", a)
 	}
