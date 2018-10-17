@@ -30,9 +30,9 @@ func BalanceNot(c BalanceCondition) BalanceCondition {
 	}
 }
 
-// After produces a BalanceCondition that can be used to identify if an
-// is from after a given time.
-func After(t time.Time) BalanceCondition {
+// BalanceAfter produces a BalanceCondition that can be used to identify if a
+// Balance is from after a given time.
+func BalanceAfter(t time.Time) BalanceCondition {
 	return func(a storage.Balance) bool {
 		return a.Date.After(t)
 	}

@@ -66,7 +66,7 @@ func TestAfter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			match := filter.After(tt.Time)(b)
+			match := filter.BalanceAfter(tt.Time)(b)
 			assert.Equal(t, tt.match, match)
 		})
 	}
@@ -74,7 +74,7 @@ func TestAfter(t *testing.T) {
 
 func TestBalanceCondition_Filter(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	c := filter.After(date)
+	c := filter.BalanceAfter(date)
 	for _, test := range []struct {
 		name string
 		in   storage.Balances
