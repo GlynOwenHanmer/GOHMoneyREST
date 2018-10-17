@@ -10,6 +10,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func stubBalanceCondition(match bool) filter.BalanceCondition {
+	return func(_ storage.Balance) bool {
+		return match
+	}
+}
+
+func TestBalanceNot(t *testing.T) {
+	var dummy storage.Balance
+	for _, test := range []struct {
+		name string
+		in   bool
+	}{
+		{
+			name: "zero-values",
+		},
+		{
+			name: "inner filter match",
+			in:   true,
+		},
+		{
+			name: "inner filter non-match",
+			in:   false,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			f := filter.BalanceNot(stubBalanceCondition(test.in))
+			match := f(dummy)
+			assert.Equal(t, !test.in, match)
+		})
+	}
+}
+
 func TestAfter(t *testing.T) {
 	b := storage.Balance{
 		Balance: balance.Balance{

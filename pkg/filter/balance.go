@@ -22,6 +22,14 @@ func (bc BalanceCondition) Filter(bs storage.Balances) storage.Balances {
 	return filtered
 }
 
+// BalanceNot produces a BalanceCondition that inverts the outcome of the given
+// BalanceCondition
+func BalanceNot(c BalanceCondition) BalanceCondition {
+	return func(a storage.Balance) bool {
+		return !c(a)
+	}
+}
+
 // After produces a BalanceCondition that can be used to identify if an
 // is from after a given time.
 func After(t time.Time) BalanceCondition {
