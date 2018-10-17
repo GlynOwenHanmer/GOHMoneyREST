@@ -11,6 +11,7 @@ import (
 	"github.com/glynternet/go-money/currency"
 	"github.com/glynternet/mon/internal/accountbalance"
 	"github.com/glynternet/mon/pkg/date"
+	"github.com/glynternet/mon/pkg/filter"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/glynternet/mon/pkg/table"
 	"github.com/pkg/errors"
@@ -455,12 +456,13 @@ func accountBalanceAtTime(store storage.Storage, a storage.Account, at time.Time
 	if err != nil {
 		return balance.Balance{}, errors.Wrapf(err, "selecting balances for account: %+v", a)
 	}
-	bbs := bs.InnerBalances()
-	if len(*bs) == 0 {
-		return balance.Balance{}, errors.Wrapf(err, "no balances for account:%+v", a)
-	}
-	b, err := bbs.AtTime(at)
-	return b, errors.Wrapf(err, "getting balance at time:%+v from returned balances:%+v", at, bbs)
+	c := filter.BalanceNot(filter.BalanceAfter(at))
+	filtered := c.Filter(*bs)
+
+	return balance.Balance{
+		Date:   at,
+		Amount: filtered.InnerBalances().Sum(),
+	}, nil
 }
 
 func init() {
