@@ -149,7 +149,7 @@ func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 
 	// assert that all accounts contain no balances
 	for _, a := range *as {
-		bs, err := store.SelectAccountBalances(a)
+		bs, err := store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 0)
 
@@ -162,7 +162,7 @@ func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 			t.FailNow()
 		}
 
-		bs, err = store.SelectAccountBalances(a)
+		bs, err = store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 1)
 
@@ -170,7 +170,7 @@ func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 		err = store.DeleteBalance(inserted.ID)
 		assert.NoError(t, err)
 
-		bs, err = store.SelectAccountBalances(a)
+		bs, err = store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 0)
 
@@ -224,7 +224,7 @@ func insertAndDeleteAccounts(t *testing.T, store storage.Storage) {
 	}
 	var abs []AccountBalances
 	for _, a := range *selectedBefore {
-		bs, err := store.SelectAccountBalances(a)
+		bs, err := store.SelectAccountBalances(a.ID)
 		if err != nil {
 			t.Fatal(errors.Wrapf(err, "selecting account balances for account %+v", a))
 		}
@@ -276,7 +276,7 @@ func insertAndDeleteAccounts(t *testing.T, store storage.Storage) {
 		for i := range *selectedAfter {
 			afterAccount := (*selectedAfter)[i]
 			assert.Equal(t, afterAccount, abs[i].Account)
-			afters, err := store.SelectAccountBalances(afterAccount)
+			afters, err := store.SelectAccountBalances(afterAccount.ID)
 			if err != nil {
 				t.Fatal(errors.Wrapf(err, "selecting account balances for account %+v", afterAccount))
 			}
@@ -295,14 +295,4 @@ func newTestBalance(t *testing.T, time time.Time, os ...balance.Option) balance.
 	b, err := balance.New(time, os...)
 	common.FatalIfError(t, err, "creating test balance")
 	return *b
-}
-
-func newTestBalances(
-	t *testing.T, count int, start time.Time, interval time.Duration, os ...balance.Option,
-) []balance.Balance {
-	bs := make([]balance.Balance, count)
-	for i := 0; i < count; i++ {
-		bs[i] = newTestBalance(t, start.Add(time.Duration(i)*interval), os...)
-	}
-	return bs
 }

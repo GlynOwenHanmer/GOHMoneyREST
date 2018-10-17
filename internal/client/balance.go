@@ -13,8 +13,8 @@ import (
 )
 
 // SelectAccountBalances will select the Balances that are stored for a given Account
-func (c Client) SelectAccountBalances(a storage.Account) (*storage.Balances, error) {
-	return c.getBalancesFromEndpoint(fmt.Sprintf(router.EndpointFmtAccountBalances, a.ID))
+func (c Client) SelectAccountBalances(id uint) (*storage.Balances, error) {
+	return c.getBalancesFromEndpoint(fmt.Sprintf(router.EndpointFmtAccountBalances, id))
 }
 
 func (c Client) getBalancesFromEndpoint(e string) (*storage.Balances, error) {

@@ -120,7 +120,7 @@ func TestClient_SelectAccountBalances(t *testing.T) {
 	time.Sleep(time.Millisecond * 10)
 
 	go func() {
-		selected, err := client.SelectAccountBalances(*s.Account) // id doesn't matter when mocking
+		selected, err := client.SelectAccountBalances((*s).Account.ID) // id doesn't matter when mocking
 		assert.NoError(t, err)
 		assert.NotNil(t, selected)
 		assert.Equal(t, s.Balances, selected)

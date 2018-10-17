@@ -54,26 +54,18 @@ var (
 		balancesTable)
 )
 
-// SelectAccountBalances returns all Balances for a given Account and any
+// SelectAccountBalances returns all Balances for a given account ID and any
 // errors that occur whilst attempting to retrieve the Balances. The Balances
 // are sorted by chronological order then by the id of the Balance in the DB
-func (pg postgres) SelectAccountBalances(a storage.Account) (*storage.Balances, error) {
-	return pg.selectBalancesForAccountID(a.ID)
-}
-
-// selectBalancesForAccountID returns all Balance items, as a single Balances
-// item, for a given account ID number in the given database, along with any
-// errors that occur whilst attempting to retrieve the Balances. The Balances
-// are sorted by chronological order then by the id of the Balance in the DB
-func (pg postgres) selectBalancesForAccountID(accountID uint) (*storage.Balances, error) {
-	return queryBalances(pg.db, balancesSelectBalancesForAccountID, accountID)
+func (pg postgres) SelectAccountBalances(id uint) (*storage.Balances, error) {
+	return queryBalances(pg.db, balancesSelectBalancesForAccountID, id)
 }
 
 // SelectBalanceByAccountAndID selects a balance with a given ID within a given
 // account. An error will be returned if no balance can be found with the ID
 // for the given account.
 func (pg postgres) SelectBalanceByAccountAndID(a storage.Account, balanceID uint) (*storage.Balance, error) {
-	bs, err := pg.SelectAccountBalances(a)
+	bs, err := pg.SelectAccountBalances(a.ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "selecting account balances for account %+v")
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/go-money/currency"
 	"github.com/glynternet/mon/internal/accountbalance"
+	"github.com/glynternet/mon/internal/model"
 	"github.com/glynternet/mon/pkg/date"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/glynternet/mon/pkg/table"
@@ -369,7 +370,7 @@ var accountBalancesCmd = &cobra.Command{
 
 		table.Accounts(storage.Accounts{*a}, os.Stdout)
 
-		bs, err := c.SelectAccountBalances(*a)
+		bs, err := c.SelectAccountBalances((*a).ID)
 		if err != nil {
 			return errors.Wrap(err, "selecting account balances")
 		}
@@ -452,7 +453,7 @@ var accountBalanceCmd = &cobra.Command{
 }
 
 func accountBalanceAtTime(store storage.Storage, a storage.Account, at time.Time) (balance.Balance, error) {
-	bs, err := store.SelectAccountBalances(a)
+	bs, err := model.SelectAccountBalances(store, a)
 	if err != nil {
 		return balance.Balance{}, errors.Wrapf(err, "selecting balances for account: %+v", a)
 	}

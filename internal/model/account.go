@@ -12,7 +12,7 @@ import (
 // account data. The updates will be verified to ensure that any data to be
 // used will be logically sound with the balances and other account details.
 func UpdateAccount(s storage.Storage, a storage.Account, updates account.Account) (*storage.Account, error) {
-	bs, err := s.SelectAccountBalances(a)
+	bs, err := s.SelectAccountBalances(a.ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "selecting Account Balances for update validation")
 	}
