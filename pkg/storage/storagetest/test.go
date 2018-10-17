@@ -32,7 +32,7 @@ func Test(t *testing.T, store storage.Storage) {
 		},
 		{
 			title: "update account",
-			run:   updateAccounts,
+			run:   updateAccount,
 		},
 		{
 			title: "insert and delete accounts",
@@ -185,93 +185,34 @@ func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 	}
 }
 
-func updateAccounts(t *testing.T, store storage.Storage) {
+func updateAccount(t *testing.T, store storage.Storage) {
 	initial := accountingtest.NewAccount(t, "A", accountingtest.NewCurrencyCode(t, "YEN"), time.Now())
 
-	t.Run("valid without balances", func(t *testing.T) {
-		inserted, err := store.InsertAccount(*initial)
-		common.FatalIfError(t, err, "inserting account to store")
+	inserted, err := store.InsertAccount(*initial)
+	common.FatalIfError(t, err, "inserting account to store")
 
-		// Here we truncate to the closest second to avoid the issue where
-		// postgres stores times down to only the closest millisecond or so
-		// TODO: Sort out rounding of times logic and document it properly. For
-		// TODO: the moment, it is assumed that accounts won't be updated and
-		// TODO: then compared against their original down to such a fine grain
-		updates := accountingtest.NewAccount(t,
-			"B",
-			accountingtest.NewCurrencyCode(t, "GBP"),
-			time.Now().Truncate(time.Second),
-			account.CloseTime(time.Now().Add(24*time.Hour).Truncate(time.Second)),
-		)
+	// Here we truncate to the closest second to avoid the issue where
+	// postgres stores times down to only the closest millisecond or so
+	// TODO: Sort out rounding of times logic and document it properly. For
+	// TODO: the moment, it is assumed that accounts won't be updated and
+	// TODO: then compared against their original down to such a fine grain
+	updates := accountingtest.NewAccount(t,
+		"B",
+		accountingtest.NewCurrencyCode(t, "GBP"),
+		time.Now().Truncate(time.Second),
+		account.CloseTime(time.Now().Add(24*time.Hour).Truncate(time.Second)),
+	)
 
-		updatedA, err := store.UpdateAccount(*inserted, *updates)
-		common.FatalIfError(t, err, "updating account")
-		if !assert.NotNil(t, updatedA) {
-			t.FailNow()
-		}
-		assert.Equal(t, updatedA.ID, inserted.ID)
-		assert.True(t,
-			updatedA.Account.Equal(*updates),
-			"inserted: %+v\nupdates: %+v\nupdatedA: %+v", inserted.Account, updates, updatedA.Account,
-		)
-	})
-
-	t.Run("valid with balances", func(t *testing.T) {
-		inserted, err := store.InsertAccount(*initial)
-		common.FatalIfError(t, err, "inserting account to store")
-
-		for _, b := range newTestBalances(t, 10, inserted.Account.Opened(), time.Hour) {
-			_, err := store.InsertBalance(*inserted, b)
-			common.FatalIfError(t, err, "inserting balance")
-		}
-
-		// Here we truncate to the closest second to avoid the issue where
-		// postgres stores times down to only the closest millisecond or so
-		// TODO: Sort out rounding of times logic and document it properly. For
-		// TODO: the moment, it is assumed that accounts won't be updated and
-		// TODO: then compared against their original down to such a fine grain
-		updates := accountingtest.NewAccount(t,
-			"B",
-			accountingtest.NewCurrencyCode(t, "GBP"),
-			time.Now().Add(-time.Hour).Truncate(time.Second),
-			account.CloseTime(time.Now().Add(200*time.Hour).Truncate(time.Second)),
-		)
-
-		updatedA, err := store.UpdateAccount(*inserted, *updates)
-		common.FatalIfError(t, err, "updating account")
-		assert.Equal(t, updatedA.ID, inserted.ID)
-		assert.True(t,
-			updatedA.Account.Equal(*updates),
-			"inserted: %+v\nupdates: %+v\nupdatedA: %+v",
-			inserted.Account, updates, updatedA.Account,
-		)
-	})
-
-	t.Run("invalid with balances", func(t *testing.T) {
-		inserted, err := store.InsertAccount(*initial)
-		common.FatalIfError(t, err, "inserting account to store")
-
-		for _, b := range newTestBalances(t, 10, inserted.Account.Opened(), time.Hour) {
-			_, err := store.InsertBalance(*inserted, b)
-			common.FatalIfError(t, err, "inserting balance")
-		}
-
-		// Here we truncate to the closest second to avoid the issue where
-		// postgres stores times down to only the closest millisecond or so
-		// TODO: Sort out rounding of times logic and document it properly. For
-		// TODO: the moment, it is assumed that accounts won't be updated and
-		// TODO: then compared against their original down to such a fine grain
-		updates := accountingtest.NewAccount(t,
-			"B",
-			accountingtest.NewCurrencyCode(t, "GBP"),
-			time.Now().Add(-time.Hour).Truncate(time.Second),
-			account.CloseTime(time.Now().Add(time.Hour).Truncate(time.Second)),
-		)
-
-		updatedA, err := store.UpdateAccount(*inserted, *updates)
-		assert.Error(t, err)
-		assert.Nil(t, updatedA)
-	})
+	updatedA, err := store.UpdateAccount(inserted.ID, *updates)
+	common.FatalIfError(t, err, "updating account")
+	if !assert.NotNil(t, updatedA) {
+		t.FailNow()
+	}
+	assert.Equal(t, updatedA.ID, inserted.ID)
+	assert.True(t,
+		updatedA.Account.Equal(*updates),
+		"inserted: %+v\nupdates: %+v\nupdatedA: %+v", inserted.Account, updates, updatedA.Account,
+	)
 }
 
 func insertAndDeleteAccounts(t *testing.T, store storage.Storage) {

@@ -162,7 +162,7 @@ var accountReopenCmd = &cobra.Command{
 			return errors.Wrap(err, "creating updates account from selected account")
 		}
 
-		b, err := c.UpdateAccount(*a, *us)
+		b, err := c.UpdateAccount(a.ID, *us)
 		if err != nil {
 			return errors.Wrap(err, "applying updates")
 		}
@@ -241,7 +241,7 @@ var accountCloseCmd = &cobra.Command{
 			return errors.Wrap(err, "creating updates account")
 		}
 
-		u, err := c.UpdateAccount(*a, *us)
+		u, err := c.UpdateAccount(a.ID, *us)
 		if err != nil {
 			return errors.Wrap(err, "updating account")
 		}
@@ -293,7 +293,7 @@ the same as the original account`,
 			return errors.Wrap(err, "creating account for update")
 		}
 
-		u, err := c.UpdateAccount(*a, *us)
+		u, err := c.UpdateAccount(a.ID, *us)
 		if err != nil {
 			return errors.Wrap(err, "updating account")
 		}
@@ -338,7 +338,7 @@ var accountRenameCmd = &cobra.Command{
 			return errors.Wrap(err, "creating new account for update")
 		}
 
-		u, err := c.UpdateAccount(*a, *us)
+		u, err := c.UpdateAccount(a.ID, *us)
 		if err != nil {
 			return errors.Wrap(err, "updating account")
 		}
