@@ -27,3 +27,12 @@ func UpdateAccount(s storage.Storage, a storage.Account, updates account.Account
 	dba, err := s.UpdateAccount(a.ID, updates)
 	return dba, errors.Wrap(err, "updating account")
 }
+
+// DeleteAccount deletes an account with the given id
+func DeleteAccount(s storage.Storage, id uint) error {
+	_, err := s.SelectAccount(id)
+	if err != nil {
+		return errors.Wrap(err, "selecting account to delete")
+	}
+	return errors.Wrap(s.DeleteAccount(id), "deleting account")
+}

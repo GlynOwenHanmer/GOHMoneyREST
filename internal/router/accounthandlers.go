@@ -118,7 +118,7 @@ func (env *environment) muxAccountDeleteHandlerFunc(r *http.Request) (int, inter
 }
 
 func (env *environment) handlerDeleteAccount(id uint) (int, interface{}, error) {
-	err := env.storage.DeleteAccount(id)
+	err := model.DeleteAccount(env.storage, id)
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrapf(err, "deleting Account with id:%d from storage", id)
 	}

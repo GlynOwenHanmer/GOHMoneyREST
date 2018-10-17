@@ -111,15 +111,6 @@ func (pg postgres) UpdateAccount(id uint, updates account.Account) (*storage.Acc
 
 // DeleteAccount deletes an account with the given id
 func (pg postgres) DeleteAccount(id uint) error {
-	_, err := pg.SelectAccount(id)
-	if err != nil {
-		return errors.Wrap(err, "selecting account to delete")
-	}
-	return errors.Wrap(pg.deleteAccount(id), "deleting account")
-}
-
-// deleteAccount deletes an account with the given id
-func (pg postgres) deleteAccount(id uint) error {
 	r, err := pg.db.Exec(queryDeleteAccount, time.Now(), id)
 	if err != nil {
 		return errors.Wrap(err, "executing query")

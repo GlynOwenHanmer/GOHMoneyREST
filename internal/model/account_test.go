@@ -71,3 +71,20 @@ func TestUpdateAccount(t *testing.T) {
 		assert.Equal(t, s.AccountErr, errors.Cause(err))
 	})
 }
+
+func TestDeleteAccount(t *testing.T) {
+	t.Run("SelectAccount error", func(t *testing.T) {
+		s := &storagetest.Storage{
+			AccountErr: errors.New("account error"),
+		}
+		err := model.DeleteAccount(s, 0)
+		assert.Equal(t, s.AccountErr, errors.Cause(err))
+		assert.Contains(t, err.Error(), "selecting account to delete")
+	})
+
+	t.Run("check id is passed", func(t *testing.T) {
+		s := &storagetest.Storage{}
+		_ = model.DeleteAccount(s, 999)
+		assert.Equal(t, uint(999), s.LastAccountID)
+	})
+}
