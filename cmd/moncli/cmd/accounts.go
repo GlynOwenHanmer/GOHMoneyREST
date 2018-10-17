@@ -168,7 +168,7 @@ func prepareAccountCondition() (filter.AccountCondition, error) {
 	}
 
 	if len(notIDs) > 0 {
-		cs = append(cs, filter.Not(idsCondition(notIDs)))
+		cs = append(cs, filter.AccountNot(idsCondition(notIDs)))
 	}
 
 	if len(currencies) > 0 {

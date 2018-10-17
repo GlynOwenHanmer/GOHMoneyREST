@@ -164,7 +164,7 @@ func TestOpenAt(t *testing.T) {
 	}
 }
 
-func TestNot(t *testing.T) {
+func TestAccountNot(t *testing.T) {
 	var dummy storage.Account
 	for _, test := range []struct {
 		name string
@@ -183,7 +183,7 @@ func TestNot(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			f := filter.Not(stubAccountCondition(test.in))
+			f := filter.AccountNot(stubAccountCondition(test.in))
 			match := f(dummy)
 			assert.Equal(t, !test.in, match)
 		})

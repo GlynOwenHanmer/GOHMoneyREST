@@ -23,9 +23,9 @@ func (ac AccountCondition) Filter(as storage.Accounts) storage.Accounts {
 	return filtered
 }
 
-// Not produces an AccountCondition that inverts the outcome of the given
+// AccountNot produces an AccountCondition that inverts the outcome of the given
 // AccountCondition
-func Not(c AccountCondition) AccountCondition {
+func AccountNot(c AccountCondition) AccountCondition {
 	return func(a storage.Account) bool {
 		return !c(a)
 	}
