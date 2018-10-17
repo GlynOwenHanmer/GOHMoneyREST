@@ -10,6 +10,18 @@ import (
 // satisfies some certain condition.
 type BalanceCondition func(storage.Balance) bool
 
+// Filter returns a set of storage.Balances that have been filtered down to the
+// ones that match the BalanceCondition
+func (bc BalanceCondition) Filter(bs storage.Balances) storage.Balances {
+	var filtered storage.Balances
+	for _, b := range bs {
+		if bc(b) {
+			filtered = append(filtered, b)
+		}
+	}
+	return filtered
+}
+
 // After produces a BalanceCondition that can be used to identify if an
 // is from after a given time.
 func After(t time.Time) BalanceCondition {

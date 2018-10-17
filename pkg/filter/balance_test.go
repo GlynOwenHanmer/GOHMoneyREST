@@ -1,10 +1,11 @@
-package filter
+package filter_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/glynternet/go-accounting/balance"
+	"github.com/glynternet/mon/pkg/filter"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,8 +34,66 @@ func TestAfter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			match := After(tt.Time)(b)
+			match := filter.After(tt.Time)(b)
 			assert.Equal(t, tt.match, match)
+		})
+	}
+}
+
+func TestBalanceCondition_Filter(t *testing.T) {
+	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
+	c := filter.After(date)
+	for _, test := range []struct {
+		name string
+		in   storage.Balances
+		out  storage.Balances
+	}{
+		{
+			name: "zero-values",
+		},
+		{
+			name: "single matching balance",
+			in:   storage.Balances{{Balance: balance.Balance{Date: date.Add(100 * time.Hour)}}},
+			out:  storage.Balances{{Balance: balance.Balance{Date: date.Add(100 * time.Hour)}}},
+		},
+		{
+			name: "single non-matching balance",
+			in:   storage.Balances{{Balance: balance.Balance{Date: date.Add(-100 * time.Hour)}}},
+		},
+		{
+			name: "single matching and single non-matching balance",
+			in: storage.Balances{
+				{Balance: balance.Balance{Date: date.Add(100 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(-100 * time.Hour)}},
+			},
+			out: storage.Balances{{Balance: balance.Balance{Date: date.Add(100 * time.Hour)}}},
+		},
+		{
+			name: "multiple mixed matching and non-matching accounts",
+			in: storage.Balances{
+				{Balance: balance.Balance{Date: date.Add(100 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(200 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(-100 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(-200 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(170 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(-190 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(1200 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(100 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(-100 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(-100 * time.Hour)}},
+			},
+			out: storage.Balances{
+				{Balance: balance.Balance{Date: date.Add(100 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(200 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(170 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(1200 * time.Hour)}},
+				{Balance: balance.Balance{Date: date.Add(100 * time.Hour)}},
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			out := c.Filter(test.in)
+			assert.Equal(t, test.out, out)
 		})
 	}
 }
