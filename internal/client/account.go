@@ -52,9 +52,9 @@ func (c Client) InsertAccount(a account.Account) (*storage.Account, error) {
 }
 
 // UpdateAccount will updated a currently stored account with updates provided by another account
-func (c Client) UpdateAccount(account *storage.Account, updates *account.Account) (*storage.Account, error) {
-	endpoint := fmt.Sprintf(router.EndpointFmtAccountUpdate, account.ID)
-	bs, err := c.postAccountToEndpoint(endpoint, *updates)
+func (c Client) UpdateAccount(id uint, updates account.Account) (*storage.Account, error) {
+	endpoint := fmt.Sprintf(router.EndpointFmtAccountUpdate, id)
+	bs, err := c.postAccountToEndpoint(endpoint, updates)
 	if err != nil {
 		return nil, errors.Wrapf(err, "posting account to endpoint %s", endpoint)
 	}

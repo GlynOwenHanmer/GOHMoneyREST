@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/glynternet/go-accounting/balance"
+	"github.com/glynternet/mon/internal/model"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -18,7 +19,7 @@ func (env *environment) balances(accountID uint) (int, interface{}, error) {
 		return http.StatusBadRequest, nil, errors.Wrapf(err, "selecting account with id %d", accountID)
 	}
 	var bs *storage.Balances
-	bs, err = env.storage.SelectAccountBalances(*a)
+	bs, err = model.SelectAccountBalances(env.storage, *a)
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrapf(err, "selecting balances for account %+v", *a)
 	}
@@ -38,7 +39,7 @@ func (env *environment) insertBalance(accountID uint, b balance.Balance) (int, i
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrap(err, "selecting account")
 	}
-	inserted, err := env.storage.InsertBalance(*a, b)
+	inserted, err := model.InsertBalance(env.storage, *a, b)
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrap(err, "inserting balance")
 	}

@@ -22,6 +22,8 @@ type Storage struct {
 
 	*storage.Balances
 	BalancesErr error
+
+	LastAccountID uint
 }
 
 // Available stubs storage.Available method
@@ -36,21 +38,29 @@ func (s *Storage) InsertAccount(account.Account) (*storage.Account, error) {
 }
 
 // UpdateAccount stubs the storage.UpdateAccount method
-func (s *Storage) UpdateAccount(a *storage.Account, updates *account.Account) (*storage.Account, error) {
+func (s *Storage) UpdateAccount(id uint, updates account.Account) (*storage.Account, error) {
+	s.LastAccountID = id
 	return s.Account, s.AccountErr
 }
 
 // SelectAccount stubs the storage.SelectAccount method
-func (s *Storage) SelectAccount(uint) (*storage.Account, error) { return s.Account, s.AccountErr }
+func (s *Storage) SelectAccount(id uint) (*storage.Account, error) {
+	s.LastAccountID = id
+	return s.Account, s.AccountErr
+}
 
 // SelectAccounts stubs the storage.SelectAccounts method
 func (s *Storage) SelectAccounts() (*storage.Accounts, error) { return s.Accounts, s.Err }
 
 // DeleteAccount stubs the storage.DeleteAccount method
-func (s *Storage) DeleteAccount(uint) error { return s.AccountErr }
+func (s *Storage) DeleteAccount(id uint) error {
+	s.LastAccountID = id
+	return s.AccountErr
+}
 
 // InsertBalance stubs the storage.InsertBalance method
-func (s *Storage) InsertBalance(storage.Account, balance.Balance) (*storage.Balance, error) {
+func (s *Storage) InsertBalance(accountID uint, _ balance.Balance) (*storage.Balance, error) {
+	s.LastAccountID = accountID
 	return s.Balance, s.BalanceErr
 }
 
@@ -58,6 +68,7 @@ func (s *Storage) InsertBalance(storage.Account, balance.Balance) (*storage.Bala
 func (s *Storage) DeleteBalance(_ uint) error { return s.Err }
 
 // SelectAccountBalances stubs the storage.SelectAccountBalances method
-func (s *Storage) SelectAccountBalances(storage.Account) (*storage.Balances, error) {
+func (s *Storage) SelectAccountBalances(id uint) (*storage.Balances, error) {
+	s.LastAccountID = id
 	return s.Balances, s.BalancesErr
 }
