@@ -146,16 +146,20 @@ func assertThreeAccountsEqual(t *testing.T, a, b, c *storage.Account) {
 func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 	as := selectAccounts(t, store)
 	assert.Len(t, *as, numOfAccounts)
-
-	// assert that all accounts contain no balances
 	for _, a := range *as {
+		// assert that all accounts contain no balances
 		bs, err := store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 0)
 
 		// insert single balance
+		// TODO: work out what is best to do here. Unfortunately, due to how
+		// TODO: fine grained that postgres can store times, we cannot just use
+		// TODO: time.Now() or some other fine grained time, as the balance
+		// TODO: that is selected will not have the same time.
+		// By using the a.Account.Opened() here, we know that the time is supported by the storage.
 		b := newTestBalance(t, a.Account.Opened())
-		inserted, err := store.InsertBalance(a, b)
+		inserted, err := store.InsertBalance(a.ID, b)
 		common.FatalIfError(t, err, "inserting Balance")
 		equal := b.Equal(inserted.Balance)
 		if !assert.True(t, equal) {
@@ -173,15 +177,6 @@ func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 		bs, err = store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 0)
-
-		invalidBalance, err := balance.New(a.Account.Opened().Add(-time.Second))
-		common.FatalIfError(t, err, "creating new invalid Balance")
-		inserted, err = store.InsertBalance(a, *invalidBalance)
-		// fail if no error was returned
-		if !assert.Error(t, err, "inserting Balance") {
-			t.FailNow()
-		}
-		assert.Nil(t, inserted)
 	}
 }
 
@@ -252,17 +247,6 @@ func insertAndDeleteAccounts(t *testing.T, store storage.Storage) {
 			err := store.DeleteAccount(a.ID)
 			selectedAfter = selectAccounts(t, store)
 			common.FatalIfError(t, err, "deleting account")
-			// Accounts count should be the number of originals, with the
-			// number that were inserted, then -1 for every delete
-			assert.Len(t, *selectedAfter, len(*selectedBefore)+numInserted-(i+1))
-		})
-
-		t.Run("deleting same account should return error", func(t *testing.T) {
-			err := store.DeleteAccount(a.ID)
-			if err == nil {
-				t.Fatal("expected an error but received nil when deleting same account id again")
-			}
-			selectedAfter = selectAccounts(t, store)
 			// Accounts count should be the number of originals, with the
 			// number that were inserted, then -1 for every delete
 			assert.Len(t, *selectedAfter, len(*selectedBefore)+numInserted-(i+1))

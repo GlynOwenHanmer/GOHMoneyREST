@@ -59,7 +59,8 @@ func (s *Storage) DeleteAccount(id uint) error {
 }
 
 // InsertBalance stubs the storage.InsertBalance method
-func (s *Storage) InsertBalance(storage.Account, balance.Balance) (*storage.Balance, error) {
+func (s *Storage) InsertBalance(accountID uint, _ balance.Balance) (*storage.Balance, error) {
+	s.LastAccountID = accountID
 	return s.Balance, s.BalanceErr
 }
 

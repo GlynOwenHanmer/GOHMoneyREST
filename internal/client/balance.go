@@ -31,8 +31,8 @@ func (c Client) getBalancesFromEndpoint(e string) (*storage.Balances, error) {
 }
 
 // InsertBalance will insert a balance for a given Account
-func (c Client) InsertBalance(a storage.Account, b balance.Balance) (*storage.Balance, error) {
-	endpoint := fmt.Sprintf(router.EndpointFmtAccountBalanceInsert, a.ID)
+func (c Client) InsertBalance(accountID uint, b balance.Balance) (*storage.Balance, error) {
+	endpoint := fmt.Sprintf(router.EndpointFmtAccountBalanceInsert, accountID)
 	bs, err := c.postBalanceToEndpoint(
 		endpoint, b,
 	)

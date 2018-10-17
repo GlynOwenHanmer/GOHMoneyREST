@@ -77,16 +77,7 @@ func (pg postgres) SelectBalanceByAccountAndID(a storage.Account, balanceID uint
 	return nil, fmt.Errorf("no balance with id %d for account", balanceID)
 }
 
-func (pg postgres) InsertBalance(a storage.Account, b balance.Balance) (*storage.Balance, error) {
-	err := a.Account.ValidateBalance(b)
-	if err != nil {
-		return nil, errors.Wrap(err, "validating balance")
-	}
-	dbb, err := pg.insertBalance(a.ID, b)
-	return dbb, errors.Wrap(err, "inserting balance")
-}
-
-func (pg postgres) insertBalance(accountID uint, b balance.Balance) (*storage.Balance, error) {
+func (pg postgres) InsertBalance(accountID uint, b balance.Balance) (*storage.Balance, error) {
 	return queryBalance(pg.db, balancesInsertBalance, accountID, b.Date, b.Amount)
 }
 

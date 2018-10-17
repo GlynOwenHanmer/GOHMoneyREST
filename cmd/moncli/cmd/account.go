@@ -11,7 +11,6 @@ import (
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/go-money/currency"
 	"github.com/glynternet/mon/internal/accountbalance"
-	"github.com/glynternet/mon/internal/model"
 	"github.com/glynternet/mon/pkg/date"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/glynternet/mon/pkg/table"
@@ -123,7 +122,7 @@ var accountOpenCmd = &cobra.Command{
 			return errors.Wrap(err, "inserting new account")
 		}
 
-		b, err := c.InsertBalance(*i, balance.Balance{
+		b, err := c.InsertBalance((*i).ID, balance.Balance{
 			Date:   i.Account.Opened(),
 			Amount: viper.GetInt(keyOpeningBalance),
 		})
@@ -224,7 +223,7 @@ var accountCloseCmd = &cobra.Command{
 			return errors.Wrap(err, "selecting account")
 		}
 
-		b, err := c.InsertBalance(*a, balance.Balance{
+		b, err := c.InsertBalance((*a).ID, balance.Balance{
 			Date:   closed,
 			Amount: viper.GetInt(keyClosingBalance),
 		})
@@ -409,7 +408,7 @@ var accountBalanceInsertCmd = &cobra.Command{
 			t = *balanceDate.Time
 		}
 
-		b, err := c.InsertBalance(*a, balance.Balance{
+		b, err := c.InsertBalance((*a).ID, balance.Balance{
 			Date:   t,
 			Amount: viper.GetInt(keyAmount),
 		})
@@ -453,7 +452,7 @@ var accountBalanceCmd = &cobra.Command{
 }
 
 func accountBalanceAtTime(store storage.Storage, a storage.Account, at time.Time) (balance.Balance, error) {
-	bs, err := model.SelectAccountBalances(store, a)
+	bs, err := store.SelectAccountBalances(a.ID)
 	if err != nil {
 		return balance.Balance{}, errors.Wrapf(err, "selecting balances for account: %+v", a)
 	}

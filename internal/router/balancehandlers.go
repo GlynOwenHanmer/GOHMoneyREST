@@ -39,7 +39,7 @@ func (env *environment) insertBalance(accountID uint, b balance.Balance) (int, i
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrap(err, "selecting account")
 	}
-	inserted, err := env.storage.InsertBalance(*a, b)
+	inserted, err := model.InsertBalance(env.storage, *a, b)
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrap(err, "inserting balance")
 	}
