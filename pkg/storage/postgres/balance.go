@@ -35,7 +35,7 @@ var (
 		balancesSelectPrefix,
 		balancesFieldAccountID,
 		balancesFieldTime,
-		balancesFieldAccountID)
+		balancesFieldID)
 
 	balancesInsertFields = fmt.Sprintf(
 		"%s, %s, %s",
