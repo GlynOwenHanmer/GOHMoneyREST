@@ -124,14 +124,20 @@ func accounts(store storage.Storage) (storage.Accounts, error) {
 func accountsBalances(s storage.Storage, as storage.Accounts, at time.Time) ([]accountbalance.AccountBalance, error) {
 	var abs []accountbalance.AccountBalance
 	for _, a := range as {
-		b, err := accountBalanceAtTime(s, a, at)
+		bs, err := accountBalancesAtTime(s, a, at)
 		if err != nil {
-			log.Println(errors.Wrapf(err, "getting balance at time:%+v for account:%+v", at, a))
-			continue
+			return nil, errors.Wrapf(err, "getting balances at time:%+v for account:%+v", at, a)
+		}
+		l, err := bs.InnerBalances().Latest()
+		if err != nil {
+			return nil, errors.Wrapf(err, "getting latest balance for account:%+v balances:%+v", a, bs)
 		}
 		abs = append(abs, accountbalance.AccountBalance{
 			Account: a,
-			Balance: b,
+			Balance: balance.Balance{
+				Date:   l.Date,
+				Amount: bs.InnerBalances().Sum(),
+			},
 		})
 	}
 

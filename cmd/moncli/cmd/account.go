@@ -442,27 +442,26 @@ var accountBalanceCmd = &cobra.Command{
 			t = *balanceDate.Time
 		}
 
-		b, err := accountBalanceAtTime(c, *a, t)
+		bs, err := accountBalancesAtTime(c, *a, t)
 		if err != nil {
 			return errors.Wrapf(err, "getting balance at time:%+v for account:%+v", t, a)
 		}
-		fmt.Println(b.Amount)
+		fmt.Println(bs.InnerBalances().Sum())
 		return nil
 	},
 }
 
-func accountBalanceAtTime(store storage.Storage, a storage.Account, at time.Time) (balance.Balance, error) {
+// accountBalancesAtTime retrieves the balances that existed for the account at
+// a given time.
+func accountBalancesAtTime(store storage.Storage, a storage.Account, at time.Time) (storage.Balances, error) {
 	bs, err := store.SelectAccountBalances(a.ID)
 	if err != nil {
-		return balance.Balance{}, errors.Wrapf(err, "selecting balances for account: %+v", a)
+		return storage.Balances{}, errors.Wrapf(err, "selecting balances for account: %+v", a)
 	}
 	c := filter.BalanceNot(filter.BalanceAfter(at))
 	filtered := c.Filter(*bs)
 
-	return balance.Balance{
-		Date:   at,
-		Amount: filtered.InnerBalances().Sum(),
-	}, nil
+	return filtered, err
 }
 
 func init() {
