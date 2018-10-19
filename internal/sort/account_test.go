@@ -14,7 +14,7 @@ import (
 func TestID(t *testing.T) {
 	t.Run("nil input remains nil", func(t *testing.T) {
 		var as storage.Accounts
-		sort.ID(as)
+		sort.AccountID(as)
 		assert.Nil(t, as)
 	})
 
@@ -58,7 +58,7 @@ func TestID(t *testing.T) {
 				as = append(as, storage.Account{ID: id})
 			}
 
-			sort.ID(as)
+			sort.AccountID(as)
 
 			var out []uint
 			for _, a := range as {
@@ -73,7 +73,7 @@ func TestID(t *testing.T) {
 func TestName(t *testing.T) {
 	t.Run("nil input remains nil", func(t *testing.T) {
 		var as storage.Accounts
-		sort.Name(as)
+		sort.AccountName(as)
 		assert.Nil(t, as)
 	})
 
@@ -123,7 +123,7 @@ func TestName(t *testing.T) {
 				as = append(as, namedAccount(name))
 			}
 
-			sort.Name(as)
+			sort.AccountName(as)
 
 			var out []string
 			for _, a := range as {
