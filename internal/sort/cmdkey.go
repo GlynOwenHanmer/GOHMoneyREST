@@ -29,8 +29,8 @@ func AllKeys() []string {
 // functions, keyed by the supported keys
 func AccountSorts() map[string]func(storage.Accounts) {
 	return map[string]func(storage.Accounts){
-		sortKeyID:   ID,
-		sortKeyName: Name,
+		sortKeyID:   AccountID,
+		sortKeyName: AccountName,
 	}
 }
 
