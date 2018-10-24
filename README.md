@@ -7,5 +7,9 @@ Mon is a simple finance-tracking set of packages and application.
 
 ### Future Improvements
 - Remove package globals
+- Implement reusable tables
+	- I have a design prepared for this using first-class functions and closures, which I believe could be pretty good. Hopefully the developer experience doesn't end up being too complex.
 - Implement Go modules
 - Move to an event-sourced model
+- Improve error handling of `moncli`
+	- It would be best to have error feedback presented in a more user-friendly way for `moncli` 
