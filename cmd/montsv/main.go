@@ -232,14 +232,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 			from:        now,
 		},
 		{
-			name:           "haircut",
-			currencyString: "GBP",
-		}: monthlyRecurringCost{
-			amount:      -2400, // ~ every 6 weeks
-			dateOfMonth: 26,
-			from:        now,
-		},
-		{
 			name:           "ABN Amro bank account",
 			currencyString: "EUR",
 		}: monthlyRecurringCost{
