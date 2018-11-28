@@ -80,8 +80,10 @@ var cmdTSV = &cobra.Command{
 			})
 		}
 
+		futures := filterTimesAfter(time.Now(), times...)
+
 		// generated account balances
-		gabss, err := generatedAccountBalances(times)
+		gabss, err := generatedAccountBalances(futures)
 		if err != nil {
 			return errors.Wrap(err, "getting recurring costs accounts")
 		}
@@ -98,6 +100,16 @@ var cmdTSV = &cobra.Command{
 
 		return errors.Wrap(w.WriteAll(datedBalances), "writing separated values")
 	},
+}
+
+func filterTimesAfter(t time.Time, times ...time.Time) []time.Time {
+	var fs []time.Time
+	for _, tt := range times {
+		if tt.After(t) {
+			fs = append(fs, tt)
+		}
+	}
+	return fs
 }
 
 func generatedAccountBalances(times []time.Time) ([]AccountBalances, error) {
@@ -198,7 +210,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 			currencyString: "GBP",
 		}: dailyRecurringAmount{
 			Amount: -1500,
-			from:   now,
 		},
 		{
 			name:           "storage",
@@ -206,7 +217,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 		}: monthlyRecurringCost{
 			amount:      -7900,
 			dateOfMonth: 1,
-			from:        time.Date(2018, 10, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			name:           "health insurance",
@@ -214,7 +224,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 		}: monthlyRecurringCost{
 			amount:      -10250,
 			dateOfMonth: 27,
-			from:        now,
 		},
 		{
 			name:           "energy bill",
@@ -222,7 +231,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 		}: monthlyRecurringCost{
 			amount:      -3150,
 			dateOfMonth: 12,
-			from:        now,
 		},
 		{
 			name:           "ABN Amro bank account",
@@ -230,7 +238,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 		}: monthlyRecurringCost{
 			amount:      -155, //every 6 weeks
 			dateOfMonth: 19,
-			from:        now,
 		},
 		{
 			name:           "ABN Maandpremie",
@@ -238,7 +245,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 		}: monthlyRecurringCost{
 			amount:      -1461,
 			dateOfMonth: 3,
-			from:        now,
 		},
 		{
 			name:           "O2 Phone Bill",
@@ -246,14 +252,12 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 		}: monthlyRecurringCost{
 			amount:      -3000,
 			dateOfMonth: 17,
-			from:        now,
 		},
 		{
 			name:           "John & Emily Registration",
 			currencyString: "EUR",
 		}: dailyRecurringAmount{
 			Amount: -142, // =-1000/7, Tenner a week
-			from:   now,
 		},
 		// {
 		// 	name: "glynternet.com domain",
@@ -264,7 +268,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 		// 		Day: 14
 		// 	},
 		// 	Amount:-1299,
-		// 	from:now
 		// },
 	}
 }
