@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	gerrors "errors"
 	"log"
 	"os"
 	"strconv"
@@ -91,11 +90,7 @@ var cmdTSV = &cobra.Command{
 		datedBalances := [][]string{makeHeader(abss)}
 
 		for _, t := range times {
-			row, err := makeRow(t, abss)
-			if err != nil {
-				return errors.Wrapf(err, "making row at time:%s", t.Format("20060102"))
-			}
-			datedBalances = append(datedBalances, row)
+			datedBalances = append(datedBalances, makeRow(t, abss))
 		}
 
 		w := csv.NewWriter(os.Stdout)
@@ -172,25 +167,18 @@ func makeHeader(accounts []AccountBalances) []string {
 	return hs
 }
 
-func makeRow(date time.Time, abss []AccountBalances) ([]string, error) {
+func makeRow(date time.Time, abss []AccountBalances) []string {
 	dateString := date.Format("20060102")
 	row := []string{dateString}
-	var bs balance.Balances
+	f := filter.BalanceNot(filter.BalanceAfter(date))
+	var total int
 	for _, abs := range abss {
-		b, err := abs.Balances.AtTime(date)
-		switch {
-		case err == nil:
-			row = append(row, strconv.Itoa(b.Amount))
-			bs = append(bs, b)
-		case err.Error() == gerrors.New(balance.ErrNoBalances).Error():
-			row = append(row, "")
-		case err != nil:
-			return nil, errors.Wrapf(err, "getting balance for account:%s at time:%s", abs.Account.Name(), dateString)
-		}
+		amount := f.Filter(abs.Balances).Sum()
+		row = append(row, strconv.Itoa(amount))
+		total += amount
 	}
-	total := bs.Sum()
 	row = append(row, strconv.Itoa(total))
-	return row, nil
+	return row
 }
 
 type AccountBalances struct {
