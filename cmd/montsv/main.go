@@ -68,7 +68,7 @@ var cmdTSV = &cobra.Command{
 		for _, a := range *as {
 			sbs, err := c.SelectAccountBalances(a.ID)
 			if err != nil {
-				errors.Wrap(err, "selecting balances for account")
+				return errors.Wrap(err, "selecting balances for account")
 			}
 			var bs = sbs.InnerBalances()
 			abss = append(abss, AccountBalances{
@@ -95,9 +95,8 @@ var cmdTSV = &cobra.Command{
 
 		w := csv.NewWriter(os.Stdout)
 		w.Comma = '\t'
-		w.WriteAll(datedBalances) // calls Flush internally
 
-		return errors.Wrap(w.Error(), "writing separated values")
+		return errors.Wrap(w.WriteAll(datedBalances), "writing separated values")
 	},
 }
 
