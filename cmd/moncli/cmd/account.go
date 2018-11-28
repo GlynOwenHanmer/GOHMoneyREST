@@ -500,7 +500,7 @@ func accountBalancesAtTime(store storage.Storage, a storage.Account, at time.Tim
 	if err != nil {
 		return storage.Balances{}, errors.Wrapf(err, "selecting balances for account: %+v", a)
 	}
-	c := filter.BalanceNot(filter.BalanceAfter(at))
+	c := filter.StorageBalanceNot(filter.StorageBalanceAfter(at))
 	filtered := c.Filter(*bs)
 
 	return filtered, err

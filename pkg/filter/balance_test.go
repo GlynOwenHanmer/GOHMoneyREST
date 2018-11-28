@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func stubBalanceCondition(match bool) filter.BalanceCondition {
+func stubBalanceCondition(match bool) filter.StorageBalanceCondition {
 	return func(_ storage.Balance) bool {
 		return match
 	}
@@ -35,7 +35,7 @@ func TestBalanceNot(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			f := filter.BalanceNot(stubBalanceCondition(test.in))
+			f := filter.StorageBalanceNot(stubBalanceCondition(test.in))
 			match := f(dummy)
 			assert.Equal(t, !test.in, match)
 		})
@@ -66,7 +66,7 @@ func TestAfter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			match := filter.BalanceAfter(tt.Time)(b)
+			match := filter.StorageBalanceAfter(tt.Time)(b)
 			assert.Equal(t, tt.match, match)
 		})
 	}
@@ -74,7 +74,7 @@ func TestAfter(t *testing.T) {
 
 func TestBalanceCondition_Filter(t *testing.T) {
 	date := time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)
-	c := filter.BalanceAfter(date)
+	c := filter.StorageBalanceAfter(date)
 	for _, test := range []struct {
 		name string
 		in   storage.Balances
