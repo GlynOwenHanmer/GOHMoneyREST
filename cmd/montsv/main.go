@@ -57,13 +57,17 @@ var cmdTSV = &cobra.Command{
 		}
 
 		*as = filter.AccountCondition(filter.AccountConditions{
+			// must have existed by the last time of the generated times
 			filter.Existed(times[len(times)-1]),
+
+			// must have bit been closed by the first time of the generated times
 			func(a storage.Account) bool {
 				closedBeforeFirstTime := a.Account.Closed().Valid && a.Account.Closed().Time.Before(times[0])
 				return !closedBeforeFirstTime
 			},
 		}.And).Filter(*as)
 
+		// stored account balances
 		var abss []AccountBalances
 		for _, a := range *as {
 			sbs, err := c.SelectAccountBalances(a.ID)
@@ -77,6 +81,7 @@ var cmdTSV = &cobra.Command{
 			})
 		}
 
+		// generated account balances
 		gabss, err := generatedAccountBalances(times)
 		if err != nil {
 			return errors.Wrap(err, "getting recurring costs accounts")
