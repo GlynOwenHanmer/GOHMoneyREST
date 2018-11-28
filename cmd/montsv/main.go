@@ -1,14 +1,13 @@
 package main
 
 import (
+	"encoding/csv"
 	gerrors "errors"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
-
-	"encoding/csv"
-	"os"
 
 	"github.com/glynternet/go-accounting/account"
 	"github.com/glynternet/go-accounting/balance"
@@ -36,10 +35,6 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-const (
-	currencyString = "EUR"
-)
 
 var now = time.Now()
 
