@@ -212,6 +212,12 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 			Amount: -1500,
 		},
 		{
+			name:           "bills",
+			currencyString: "GBP",
+		}: dailyRecurringAmount{
+			Amount: -322, // 10000 a month but not on any specific day, as far as I know
+		},
+		{
 			name:           "storage",
 			currencyString: "EUR",
 		}: monthlyRecurringCost{
