@@ -66,7 +66,7 @@ var cmdTSV = &cobra.Command{
 
 		var abss []AccountBalances
 		for _, a := range *as {
-			sbs, err := c.SelectAccountBalances(a)
+			sbs, err := c.SelectAccountBalances(a.ID)
 			if err != nil {
 				errors.Wrap(err, "selecting balances for account")
 			}
