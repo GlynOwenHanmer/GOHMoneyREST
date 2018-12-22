@@ -31,6 +31,11 @@ func TestBalance_Equal(t *testing.T) {
 			b:    Balance{Balance: balance.Balance{Amount: 2}},
 		},
 		{
+			name: "unequal Note",
+			a:    Balance{ID: 4, Balance: balance.Balance{Amount: 1}, Note: "this note"},
+			b:    Balance{ID: 4, Balance: balance.Balance{Amount: 1}},
+		},
+		{
 			name:  "equal",
 			a:     Balance{ID: 4, Balance: balance.Balance{Amount: 1}},
 			b:     Balance{ID: 4, Balance: balance.Balance{Amount: 1}},
@@ -45,7 +50,8 @@ func TestBalance_Equal(t *testing.T) {
 
 func TestBalance_JSONLoop(t *testing.T) {
 	b := Balance{
-		ID: 47,
+		ID:   47,
+		Note: "test note",
 		Balance: balance.Balance{
 			Date:   time.Date(1000, 0, 0, 0, 0, 0, 0, time.UTC),
 			Amount: -34567,

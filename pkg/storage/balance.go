@@ -7,15 +7,13 @@ import (
 // Balance holds logic for an Account item that is held within a go-money database.
 type Balance struct {
 	balance.Balance
-	ID uint
+	ID   uint
+	Note string
 }
 
 // Equal returns true if two Balance items are logically identical
 func (b Balance) Equal(ob Balance) bool {
-	if b.ID != ob.ID || !b.Balance.Equal(ob.Balance) {
-		return false
-	}
-	return true
+	return b.ID == ob.ID && b.Note == ob.Note && b.Balance.Equal(ob.Balance)
 }
 
 // Balances holds multiple Balance items
