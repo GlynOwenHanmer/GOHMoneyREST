@@ -39,17 +39,20 @@ var (
 		fieldCurrency,
 		fieldDeleted)
 
-	querySelectAccounts = fmt.Sprintf(
-		"SELECT %s FROM %s WHERE %s IS NULL ORDER BY %s ASC;",
+	accountsSelectPrefix = fmt.Sprintf(
+		`SELECT %s FROM %s WHERE `,
 		accountsFieldsSelect,
-		accountsTable,
+		accountsTable)
+
+	querySelectAccounts = fmt.Sprintf(
+		"%s%s IS NULL ORDER BY %s ASC;",
+		accountsSelectPrefix,
 		fieldDeleted,
 		fieldID)
 
 	querySelectAccount = fmt.Sprintf(
-		"SELECT %s FROM %s WHERE %s = $1 AND %s IS NULL;",
-		accountsFieldsSelect,
-		accountsTable,
+		"%s%s = $1 AND %s IS NULL;",
+		accountsSelectPrefix,
 		fieldID,
 		fieldDeleted)
 
