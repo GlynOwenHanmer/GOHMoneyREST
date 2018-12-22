@@ -19,18 +19,18 @@ const (
 	fieldClosed   = "closed"
 	fieldCurrency = "currency"
 	fieldDeleted  = "deleted"
-	table         = "accounts"
+	accountsTable = "accounts"
 )
 
 var (
-	fieldsInsert = fmt.Sprintf(
+	accountsFieldsInsert = fmt.Sprintf(
 		"%s, %s, %s, %s",
 		fieldName,
 		fieldOpened,
 		fieldClosed,
 		fieldCurrency)
 
-	fieldsSelect = fmt.Sprintf(
+	accountsFieldsSelect = fmt.Sprintf(
 		"%s, %s, %s, %s, %s, %s",
 		fieldID,
 		fieldName,
@@ -39,39 +39,42 @@ var (
 		fieldCurrency,
 		fieldDeleted)
 
+	accountsSelectPrefix = fmt.Sprintf(
+		`SELECT %s FROM %s WHERE `,
+		accountsFieldsSelect,
+		accountsTable)
+
 	querySelectAccounts = fmt.Sprintf(
-		"SELECT %s FROM %s WHERE %s IS NULL ORDER BY %s ASC;",
-		fieldsSelect,
-		table,
+		"%s%s IS NULL ORDER BY %s ASC;",
+		accountsSelectPrefix,
 		fieldDeleted,
 		fieldID)
 
 	querySelectAccount = fmt.Sprintf(
-		"SELECT %s FROM %s WHERE %s = $1 AND %s IS NULL;",
-		fieldsSelect,
-		table,
+		"%s%s = $1 AND %s IS NULL;",
+		accountsSelectPrefix,
 		fieldID,
 		fieldDeleted)
 
 	queryInsertAccount = fmt.Sprintf(
 		`INSERT INTO %s (%s) VALUES ($1, $2, $3, $4) returning %s`,
-		table,
-		fieldsInsert,
-		fieldsSelect)
+		accountsTable,
+		accountsFieldsInsert,
+		accountsFieldsSelect)
 
 	queryUpdateAccount = fmt.Sprintf(
 		`UPDATE %s SET %s = $1, %s = $2, %s = $3, %s = $4 WHERE %s = $5 returning %s`,
-		table,
+		accountsTable,
 		fieldName,
 		fieldOpened,
 		fieldClosed,
 		fieldCurrency,
 		fieldID,
-		fieldsSelect)
+		accountsFieldsSelect)
 
 	queryDeleteAccount = fmt.Sprintf(
 		`UPDATE %s SET %s = $1 WHERE %s = $2`,
-		table,
+		accountsTable,
 		fieldDeleted,
 		fieldID,
 	)
