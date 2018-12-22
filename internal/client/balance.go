@@ -30,13 +30,19 @@ func (c Client) getBalancesFromEndpoint(e string) (*storage.Balances, error) {
 }
 
 // InsertBalance will insert a balance for a given Account
-func (c Client) InsertBalance(accountID uint, b balance.Balance) (*storage.Balance, error) {
+func (c Client) InsertBalance(accountID uint, b balance.Balance, note string) (*storage.Balance, error) {
 	endpoint := fmt.Sprintf(router.EndpointFmtAccountBalanceInsert, accountID)
-	bs, err := c.postBalanceToEndpoint(
-		endpoint, b,
-	)
+
+	res, err := c.postAsJSONToEndpoint(endpoint, router.BalanceInsertBody{
+		Balance: b,
+		Note:    note,
+	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "posting Balance to endpoint %s", endpoint)
+		return nil, errors.Wrapf(err, "posting BalanceInsertBody to endpoint:%s", endpoint)
+	}
+	bs, err := processResponseForBody(res)
+	if err != nil {
+		return nil, errors.Wrap(err, "processing response for body")
 	}
 	return unmarshalJSONToBalance(bs)
 }

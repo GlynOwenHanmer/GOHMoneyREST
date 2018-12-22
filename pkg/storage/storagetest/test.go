@@ -159,10 +159,14 @@ func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 		// TODO: that is selected will not have the same time.
 		// By using the a.Account.Opened() here, we know that the time is supported by the storage.
 		b := newTestBalance(t, a.Account.Opened())
-		inserted, err := store.InsertBalance(a.ID, b)
+		note := "first balance"
+		inserted, err := store.InsertBalance(a.ID, b, note)
 		common.FatalIfError(t, err, "inserting Balance")
 		equal := b.Equal(inserted.Balance)
 		if !assert.True(t, equal) {
+			t.FailNow()
+		}
+		if !assert.Equal(t, note, inserted.Note) {
 			t.FailNow()
 		}
 

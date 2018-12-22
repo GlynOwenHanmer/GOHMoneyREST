@@ -80,7 +80,7 @@ func (pg postgres) SelectBalanceByAccountAndID(a storage.Account, balanceID uint
 	return nil, fmt.Errorf("no balance with id %d for account", balanceID)
 }
 
-func (pg postgres) InsertBalance(accountID uint, b balance.Balance) (*storage.Balance, error) {
+func (pg postgres) InsertBalance(accountID uint, b balance.Balance, _ string) (*storage.Balance, error) {
 	return queryBalance(pg.db, balancesInsertBalance, accountID, b.Date, b.Amount)
 }
 
