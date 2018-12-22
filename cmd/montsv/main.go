@@ -225,20 +225,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 			dateOfMonth: 1,
 		},
 		{
-			name:           "health insurance",
-			currencyString: "EUR",
-		}: monthlyRecurringCost{
-			amount:      -10250,
-			dateOfMonth: 27,
-		},
-		{
-			name:           "energy bill",
-			currencyString: "EUR",
-		}: monthlyRecurringCost{
-			amount:      -3150,
-			dateOfMonth: 12,
-		},
-		{
 			name:           "ABN Amro bank account",
 			currencyString: "EUR",
 		}: monthlyRecurringCost{
@@ -258,12 +244,6 @@ func getAmountGenerators() map[accountDetails]amountGenerator {
 		}: monthlyRecurringCost{
 			amount:      -3000,
 			dateOfMonth: 17,
-		},
-		{
-			name:           "John & Emily Registration",
-			currencyString: "EUR",
-		}: dailyRecurringAmount{
-			Amount: -142, // =-1000/7, Tenner a week
 		},
 		// {
 		// 	name: "glynternet.com domain",
