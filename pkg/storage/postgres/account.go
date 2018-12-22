@@ -23,14 +23,14 @@ const (
 )
 
 var (
-	fieldsInsert = fmt.Sprintf(
+	accountsFieldsInsert = fmt.Sprintf(
 		"%s, %s, %s, %s",
 		fieldName,
 		fieldOpened,
 		fieldClosed,
 		fieldCurrency)
 
-	fieldsSelect = fmt.Sprintf(
+	accountsFieldsSelect = fmt.Sprintf(
 		"%s, %s, %s, %s, %s, %s",
 		fieldID,
 		fieldName,
@@ -41,14 +41,14 @@ var (
 
 	querySelectAccounts = fmt.Sprintf(
 		"SELECT %s FROM %s WHERE %s IS NULL ORDER BY %s ASC;",
-		fieldsSelect,
+		accountsFieldsSelect,
 		accountsTable,
 		fieldDeleted,
 		fieldID)
 
 	querySelectAccount = fmt.Sprintf(
 		"SELECT %s FROM %s WHERE %s = $1 AND %s IS NULL;",
-		fieldsSelect,
+		accountsFieldsSelect,
 		accountsTable,
 		fieldID,
 		fieldDeleted)
@@ -56,8 +56,8 @@ var (
 	queryInsertAccount = fmt.Sprintf(
 		`INSERT INTO %s (%s) VALUES ($1, $2, $3, $4) returning %s`,
 		accountsTable,
-		fieldsInsert,
-		fieldsSelect)
+		accountsFieldsInsert,
+		accountsFieldsSelect)
 
 	queryUpdateAccount = fmt.Sprintf(
 		`UPDATE %s SET %s = $1, %s = $2, %s = $3, %s = $4 WHERE %s = $5 returning %s`,
@@ -67,7 +67,7 @@ var (
 		fieldClosed,
 		fieldCurrency,
 		fieldID,
-		fieldsSelect)
+		accountsFieldsSelect)
 
 	queryDeleteAccount = fmt.Sprintf(
 		`UPDATE %s SET %s = $1 WHERE %s = $2`,
