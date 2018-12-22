@@ -40,21 +40,20 @@ var (
 		fieldDeleted)
 
 	accountsSelectPrefix = fmt.Sprintf(
-		`SELECT %s FROM %s WHERE `,
+		`SELECT %s FROM %s WHERE %s IS NULL `,
 		accountsFieldsSelect,
-		accountsTable)
+		accountsTable,
+		fieldDeleted)
 
 	querySelectAccounts = fmt.Sprintf(
-		"%s%s IS NULL ORDER BY %s ASC;",
+		"%sORDER BY %s ASC;",
 		accountsSelectPrefix,
-		fieldDeleted,
 		fieldID)
 
 	querySelectAccount = fmt.Sprintf(
-		"%s%s = $1 AND %s IS NULL;",
+		"%sAND %s = $1;",
 		accountsSelectPrefix,
-		fieldID,
-		fieldDeleted)
+		fieldID)
 
 	queryInsertAccount = fmt.Sprintf(
 		`INSERT INTO %s (%s) VALUES ($1, $2, $3, $4) returning %s`,

@@ -2,9 +2,8 @@ package client
 
 import (
 	"encoding/json"
-	"net/http"
-
 	"fmt"
+	"net/http"
 
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/mon/internal/router"
