@@ -60,14 +60,6 @@ func (c Client) DeleteBalance(id uint) error {
 	return nil
 }
 
-func (c Client) postBalanceToEndpoint(e string, b balance.Balance) ([]byte, error) {
-	res, err := c.postAsJSONToEndpoint(e, b)
-	if err != nil {
-		return nil, errors.Wrap(err, "posting as JSON")
-	}
-	return processResponseForBody(res)
-}
-
 func unmarshalJSONToBalance(data []byte) (*storage.Balance, error) {
 	b := &storage.Balance{}
 	err := errors.Wrapf(json.Unmarshal(data, b), "json unmarshalling into balance. bytes as string: %s", data)
