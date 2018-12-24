@@ -168,12 +168,14 @@ func createBalancesTable(connection string) error {
 	%s integer NOT NULL,
 	%s timestamp with time zone NOT NULL,
 	%s bigint NOT NULL,
+	%s varchar(240),
 	%s timestamp with time zone);`,
 		balancesTable,
 		balancesFieldID,
 		balancesFieldAccountID,
 		balancesFieldTime,
 		balancesFieldAmount,
+		balancesFieldNote,
 		fieldDeleted)
 	_, err = db.Exec(query)
 	return errors.Wrap(err, "executing create Balances query")
