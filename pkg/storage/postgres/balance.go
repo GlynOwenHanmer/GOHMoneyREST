@@ -125,7 +125,7 @@ func scanRowsForBalances(rows *sql.Rows) (bs *storage.Balances, err error) {
 		var ID uint
 		var date time.Time
 		var amount int
-		var note string
+		var note sql.NullString
 		err = rows.Scan(&ID, &date, &amount, &note)
 		if err != nil {
 			return nil, errors.Wrap(err, "scanning rows")
@@ -138,7 +138,7 @@ func scanRowsForBalances(rows *sql.Rows) (bs *storage.Balances, err error) {
 		*bs = append(*bs, storage.Balance{
 			ID:      ID,
 			Balance: *innerB,
-			Note:    note,
+			Note:    note.String,
 		})
 	}
 	if err == nil {
