@@ -495,7 +495,7 @@ func init() {
 
 	accountCloseCmd.Flags().VarP(balanceDate, keyDate, "d", "account closed date")
 	accountCloseCmd.Flags().IntP(keyClosingBalance, "b", 0, "account closing balance")
-	accountOpenCmd.Flags().String(keyClosingBalanceNote, "", "note to attach to account closing balance")
+	accountCloseCmd.Flags().String(keyClosingBalanceNote, "", "note to attach to account closing balance")
 
 	accountUpdateCmd.Flags().StringP(keyName, "n", "", "account name")
 	accountUpdateCmd.Flags().VarP(accountOpened, keyOpened, "o", "account opened date")
