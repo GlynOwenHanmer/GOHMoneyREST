@@ -139,13 +139,21 @@ func createAccountsTable(connection string) error {
 		return errors.Wrap(err, "opening DB connection")
 	}
 	defer nonReturningCloseDB(db)
-	_, err = db.Exec(`CREATE TABLE accounts (
-	id SERIAL PRIMARY KEY,
-	name varchar(100) NOT NULL,
-	currency char(3) NOT NULL,
-	opened timestamp with time zone NOT NULL,
-	closed timestamp with time zone,
-	deleted timestamp with time zone);`)
+	query := fmt.Sprintf(`CREATE TABLE %s (
+	%s SERIAL PRIMARY KEY,
+	%s varchar(100) NOT NULL,
+	%s char(3) NOT NULL,
+	%s timestamp with time zone NOT NULL,
+	%s timestamp with time zone,
+	%s timestamp with time zone);`,
+		accountsTable,
+		fieldID,
+		fieldName,
+		fieldCurrency,
+		fieldOpened,
+		fieldClosed,
+		fieldDeleted)
+	_, err = db.Exec(query)
 	return err
 }
 
@@ -154,17 +162,19 @@ func createBalancesTable(connection string) error {
 	if err != nil {
 		return errors.Wrap(err, "opening DB connection")
 	}
+	defer nonReturningCloseDB(db)
 	query := fmt.Sprintf(`CREATE TABLE %s (
 	%s SERIAL PRIMARY KEY,
 	%s integer NOT NULL,
 	%s timestamp with time zone NOT NULL,
-	%s bigint NOT NULL);`,
+	%s bigint NOT NULL,
+	%s timestamp with time zone);`,
 		balancesTable,
 		balancesFieldID,
 		balancesFieldAccountID,
 		balancesFieldTime,
-		balancesFieldAmount)
-	defer nonReturningCloseDB(db)
+		balancesFieldAmount,
+		fieldDeleted)
 	_, err = db.Exec(query)
 	return errors.Wrap(err, "executing create Balances query")
 }

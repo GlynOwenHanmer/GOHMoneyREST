@@ -26,12 +26,13 @@ var (
 		balancesFieldAmount)
 
 	balancesSelectPrefix = fmt.Sprintf(
-		`SELECT %s FROM %s WHERE `,
+		`SELECT %s FROM %s WHERE %s IS NULL `,
 		balancesSelectFields,
-		balancesTable)
+		balancesTable,
+		fieldDeleted)
 
 	balancesSelectBalancesForAccountID = fmt.Sprintf(
-		"%s%s = $1 ORDER BY %s ASC, %s ASC;",
+		"%sAND %s = $1 ORDER BY %s ASC, %s ASC;",
 		balancesSelectPrefix,
 		balancesFieldAccountID,
 		balancesFieldTime,
@@ -50,8 +51,10 @@ var (
 		balancesSelectFields)
 
 	balancesDeleteBalance = fmt.Sprintf(
-		`DELETE FROM %s WHERE id = $1;`,
-		balancesTable)
+		`UPDATE %s SET %s = $1 WHERE id = $2;`,
+		balancesTable,
+		fieldDeleted,
+	)
 )
 
 // SelectAccountBalances returns all Balances for a given account ID and any
@@ -82,7 +85,7 @@ func (pg postgres) InsertBalance(accountID uint, b balance.Balance) (*storage.Ba
 }
 
 func (pg postgres) DeleteBalance(id uint) error {
-	_, err := queryBalance(pg.db, balancesDeleteBalance, id)
+	_, err := queryBalance(pg.db, balancesDeleteBalance, time.Now(), id)
 	return errors.Wrap(err, "querying balance")
 }
 
