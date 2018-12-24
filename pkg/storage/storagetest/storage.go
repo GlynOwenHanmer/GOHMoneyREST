@@ -23,7 +23,8 @@ type Storage struct {
 	*storage.Balances
 	BalancesErr error
 
-	LastAccountID uint
+	LastAccountID   uint
+	LastBalanceNote string
 }
 
 // Available stubs storage.Available method
@@ -59,15 +60,16 @@ func (s *Storage) DeleteAccount(id uint) error {
 }
 
 // InsertBalance stubs the storage.InsertBalance method
-func (s *Storage) InsertBalance(accountID uint, _ balance.Balance) (*storage.Balance, error) {
+func (s *Storage) InsertBalance(accountID uint, _ balance.Balance, note string) (*storage.Balance, error) {
 	s.LastAccountID = accountID
+	s.LastBalanceNote = note
 	return s.Balance, s.BalanceErr
 }
 
 // DeleteBalance stubs the storage.DeleteBalance method
 func (s *Storage) DeleteBalance(_ uint) error { return s.Err }
 
-// SelectAccountBalances stubs the storage.SelectAccountBalances method
+// SelectAccountBalances mocks the storage.SelectAccountBalances method
 func (s *Storage) SelectAccountBalances(id uint) (*storage.Balances, error) {
 	s.LastAccountID = id
 	return s.Balances, s.BalancesErr

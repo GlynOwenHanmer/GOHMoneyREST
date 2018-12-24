@@ -15,15 +15,17 @@ const (
 	balancesFieldAmount    = "amount"
 	balancesFieldID        = "id"
 	balancesFieldTime      = "time"
+	balancesFieldNote      = "note"
 	balancesTable          = "balances"
 )
 
 var (
 	balancesSelectFields = fmt.Sprintf(
-		"%s, %s, %s",
+		"%s, %s, %s, %s",
 		balancesFieldID,
 		balancesFieldTime,
-		balancesFieldAmount)
+		balancesFieldAmount,
+		balancesFieldNote)
 
 	balancesSelectPrefix = fmt.Sprintf(
 		`SELECT %s FROM %s WHERE %s IS NULL `,
@@ -39,13 +41,14 @@ var (
 		balancesFieldID)
 
 	balancesInsertFields = fmt.Sprintf(
-		"%s, %s, %s",
+		"%s, %s, %s, %s",
 		balancesFieldAccountID,
 		balancesFieldTime,
-		balancesFieldAmount)
+		balancesFieldAmount,
+		balancesFieldNote)
 
 	balancesInsertBalance = fmt.Sprintf(
-		`INSERT INTO %s (%s) VALUES ($1, $2, $3) RETURNING %s;`,
+		`INSERT INTO %s (%s) VALUES ($1, $2, $3, $4) RETURNING %s;`,
 		balancesTable,
 		balancesInsertFields,
 		balancesSelectFields)
@@ -80,8 +83,8 @@ func (pg postgres) SelectBalanceByAccountAndID(a storage.Account, balanceID uint
 	return nil, fmt.Errorf("no balance with id %d for account", balanceID)
 }
 
-func (pg postgres) InsertBalance(accountID uint, b balance.Balance) (*storage.Balance, error) {
-	return queryBalance(pg.db, balancesInsertBalance, accountID, b.Date, b.Amount)
+func (pg postgres) InsertBalance(accountID uint, b balance.Balance, note string) (*storage.Balance, error) {
+	return queryBalance(pg.db, balancesInsertBalance, accountID, b.Date, b.Amount, note)
 }
 
 func (pg postgres) DeleteBalance(id uint) error {
@@ -121,17 +124,22 @@ func scanRowsForBalances(rows *sql.Rows) (bs *storage.Balances, err error) {
 	for rows.Next() {
 		var ID uint
 		var date time.Time
-		var amount float64
-		err = rows.Scan(&ID, &date, &amount)
+		var amount int
+		var note string
+		err = rows.Scan(&ID, &date, &amount, &note)
 		if err != nil {
 			return nil, errors.Wrap(err, "scanning rows")
 		}
 		var innerB *balance.Balance
-		innerB, err = balance.New(date, balance.Amount(int(amount)))
+		innerB, err = balance.New(date, balance.Amount(amount))
 		if err != nil {
 			return nil, errors.Wrap(err, "creating new balance from scan results")
 		}
-		*bs = append(*bs, storage.Balance{ID: ID, Balance: *innerB})
+		*bs = append(*bs, storage.Balance{
+			ID:      ID,
+			Balance: *innerB,
+			Note:    note,
+		})
 	}
 	if err == nil {
 		err = errors.Wrap(rows.Err(), "rows error: ")

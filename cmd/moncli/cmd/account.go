@@ -125,7 +125,7 @@ var accountOpenCmd = &cobra.Command{
 		b, err := c.InsertBalance((*i).ID, balance.Balance{
 			Date:   i.Account.Opened(),
 			Amount: viper.GetInt(keyOpeningBalance),
-		})
+		}, "")
 		if err != nil {
 			return errors.Wrap(err, "inserting balance")
 		}
@@ -226,7 +226,7 @@ var accountCloseCmd = &cobra.Command{
 		b, err := c.InsertBalance((*a).ID, balance.Balance{
 			Date:   closed,
 			Amount: viper.GetInt(keyClosingBalance),
-		})
+		}, "")
 		if err != nil {
 			return errors.Wrap(err, "inserting balance")
 		}
@@ -411,7 +411,7 @@ var accountBalanceInsertCmd = &cobra.Command{
 		b, err := c.InsertBalance((*a).ID, balance.Balance{
 			Date:   t,
 			Amount: viper.GetInt(keyAmount),
-		})
+		}, "")
 		if err != nil {
 			return errors.Wrap(err, "inserting balance")
 		}
