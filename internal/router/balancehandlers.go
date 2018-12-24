@@ -34,12 +34,12 @@ func (env *environment) muxAccountBalancesHandlerFunc(r *http.Request) (int, int
 	return env.balances(id)
 }
 
-func (env *environment) insertBalance(accountID uint, b balance.Balance) (int, interface{}, error) {
+func (env *environment) insertBalance(accountID uint, b balance.Balance, note string) (int, interface{}, error) {
 	a, err := env.storage.SelectAccount(accountID)
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrap(err, "selecting account")
 	}
-	inserted, err := model.InsertBalance(env.storage, *a, b)
+	inserted, err := model.InsertBalance(env.storage, *a, b, note)
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrap(err, "inserting balance")
 	}
@@ -62,6 +62,14 @@ func (env *environment) deleteBalance(id uint) (int, interface{}, error) {
 	return http.StatusOK, "", nil
 }
 
+// BalanceInsertBody is a struct that should be marshalled to json and used as
+// the body of a balance insert request
+// The function of BalanceInsertBody in future will be fulfilled using protobuf
+type BalanceInsertBody struct {
+	Balance balance.Balance
+	Note    string
+}
+
 func (env *environment) muxAccountBalanceInsertHandlerFunc(r *http.Request) (int, interface{}, error) {
 	id, err := extractID(mux.Vars(r))
 	if err != nil {
@@ -74,17 +82,17 @@ func (env *environment) muxAccountBalanceInsertHandlerFunc(r *http.Request) (int
 	}
 
 	defer func() {
-		// TODO: this handler only needs to take a []byte which would mean we can handle closing the body elsewhere
+		// TODO: this handler only needs to take a []byte or io.Reader, so we could handle closing the body elsewhere
 		cErr := r.Body.Close()
 		if cErr != nil {
 			log.Print(errors.Wrap(err, "closing request body"))
 		}
 	}()
 
-	var b balance.Balance
-	err = json.Unmarshal(bod, &b)
+	var bib BalanceInsertBody
+	err = json.Unmarshal(bod, &bib)
 	if err != nil {
 		return http.StatusBadRequest, nil, errors.Wrapf(err, "unmarshalling request body")
 	}
-	return env.insertBalance(id, b)
+	return env.insertBalance(id, bib.Balance, bib.Note)
 }

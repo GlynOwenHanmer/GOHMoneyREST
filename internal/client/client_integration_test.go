@@ -188,9 +188,10 @@ func TestClient_InsertBalance(t *testing.T) {
 	time.Sleep(time.Millisecond * 10)
 
 	go func() {
-		inserted, err := client.InsertBalance(0, insert)
+		inserted, err := client.InsertBalance(0, insert, "test note")
 		assert.NoError(t, err)
 		assert.Equal(t, expected, inserted)
+		assert.Equal(t, s.LastBalanceNote, "test note")
 		close(errCh)
 	}()
 

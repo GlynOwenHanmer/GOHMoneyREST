@@ -55,13 +55,14 @@ func AccountsWithBalance(abs []accountbalance.AccountBalance, w io.Writer) {
 // Balances writes a table for a given set of storage.Balances to a given io.Writer
 func Balances(bs storage.Balances, w io.Writer) {
 	t := newDefaultTable(w)
-	t.SetHeader([]string{"ID", "Amount", "Date"})
+	t.SetHeader([]string{"ID", "Amount", "Date", "Note"})
 
 	for _, b := range bs {
 		t.Append([]string{
 			strconv.FormatUint(uint64(b.ID), 10),
 			strconv.Itoa(b.Amount),
 			b.Date.Format(dateFormat),
+			b.Note,
 		})
 	}
 
