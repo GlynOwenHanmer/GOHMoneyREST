@@ -9,7 +9,6 @@ import (
 	"github.com/glynternet/go-accounting/account"
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/go-money/currency"
-	"github.com/glynternet/mon/internal/accountbalance"
 	"github.com/glynternet/mon/pkg/date"
 	"github.com/glynternet/mon/pkg/filter"
 	"github.com/glynternet/mon/pkg/storage"
@@ -20,15 +19,18 @@ import (
 )
 
 const (
-	keyDate           = "date"
-	keyAmount         = "amount"
-	keyName           = "name"
-	keyCurrency       = "currency"
-	keyOpened         = "opened"
-	keyClosed         = "closed"
-	keyLimit          = "limit"
-	keyOpeningBalance = "opening-balance"
-	keyClosingBalance = "closing-balance"
+	keyDate               = "date"
+	keyAmount             = "amount"
+	keyNote               = "note"
+	keyName               = "name"
+	keyCurrency           = "currency"
+	keyOpened             = "opened"
+	keyClosed             = "closed"
+	keyLimit              = "limit"
+	keyOpeningBalance     = "opening-balance"
+	keyOpeningBalanceNote = "opening-balance-note"
+	keyClosingBalance     = "closing-balance"
+	keyClosingBalanceNote = "closing-balance-note"
 )
 
 var (
@@ -122,18 +124,20 @@ var accountOpenCmd = &cobra.Command{
 			return errors.Wrap(err, "inserting new account")
 		}
 
-		b, err := c.InsertBalance((*i).ID, balance.Balance{
-			Date:   i.Account.Opened(),
-			Amount: viper.GetInt(keyOpeningBalance),
-		}, "")
+		b, err := c.InsertBalance(
+			(*i).ID,
+			balance.Balance{
+				Date:   i.Account.Opened(),
+				Amount: viper.GetInt(keyOpeningBalance),
+			},
+			viper.GetString(keyOpeningBalanceNote),
+		)
 		if err != nil {
 			return errors.Wrap(err, "inserting balance")
 		}
 
-		table.AccountsWithBalance([]accountbalance.AccountBalance{{
-			Account: *i,
-			Balance: b.Balance,
-		}}, os.Stdout)
+		table.Accounts(storage.Accounts{*i}, os.Stdout)
+		table.Balances(storage.Balances{*b}, os.Stdout)
 		return nil
 	},
 }
@@ -223,10 +227,14 @@ var accountCloseCmd = &cobra.Command{
 			return errors.Wrap(err, "selecting account")
 		}
 
-		b, err := c.InsertBalance((*a).ID, balance.Balance{
-			Date:   closed,
-			Amount: viper.GetInt(keyClosingBalance),
-		}, "")
+		b, err := c.InsertBalance(
+			(*a).ID,
+			balance.Balance{
+				Date:   closed,
+				Amount: viper.GetInt(keyClosingBalance),
+			},
+			viper.GetString(keyClosingBalanceNote),
+		)
 		if err != nil {
 			return errors.Wrap(err, "inserting balance")
 		}
@@ -246,10 +254,8 @@ var accountCloseCmd = &cobra.Command{
 			return errors.Wrap(err, "updating account")
 		}
 
-		table.AccountsWithBalance([]accountbalance.AccountBalance{{
-			Account: *u,
-			Balance: b.Balance,
-		}}, os.Stdout)
+		table.Accounts(storage.Accounts{*u}, os.Stdout)
+		table.Balances(storage.Balances{*b}, os.Stdout)
 		return nil
 	},
 }
@@ -408,10 +414,14 @@ var accountBalanceInsertCmd = &cobra.Command{
 			t = *balanceDate.Time
 		}
 
-		b, err := c.InsertBalance((*a).ID, balance.Balance{
-			Date:   t,
-			Amount: viper.GetInt(keyAmount),
-		}, "")
+		b, err := c.InsertBalance(
+			(*a).ID,
+			balance.Balance{
+				Date:   t,
+				Amount: viper.GetInt(keyAmount),
+			},
+			viper.GetString(keyNote),
+		)
 		if err != nil {
 			return errors.Wrap(err, "inserting balance")
 		}
@@ -481,9 +491,11 @@ func init() {
 
 	accountOpenCmd.Flags().VarP(accountOpened, keyOpened, "o", "account opened date")
 	accountOpenCmd.Flags().IntP(keyOpeningBalance, "b", 0, "account opening balance")
+	accountOpenCmd.Flags().String(keyOpeningBalanceNote, "", "note to attach to account opening balance")
 
 	accountCloseCmd.Flags().VarP(balanceDate, keyDate, "d", "account closed date")
 	accountCloseCmd.Flags().IntP(keyClosingBalance, "b", 0, "account closing balance")
+	accountCloseCmd.Flags().String(keyClosingBalanceNote, "", "note to attach to account closing balance")
 
 	accountUpdateCmd.Flags().StringP(keyName, "n", "", "account name")
 	accountUpdateCmd.Flags().VarP(accountOpened, keyOpened, "o", "account opened date")
@@ -494,6 +506,7 @@ func init() {
 	// TODO: Stop multiple usage of the flag like in this article: http://blog.ralch.com/tutorial/golang-custom-flags/
 	accountBalanceInsertCmd.Flags().VarP(balanceDate, keyDate, "d", "date of balance to insert")
 	accountBalanceInsertCmd.Flags().IntP(keyAmount, "a", 0, "amount of balance to insert")
+	accountBalanceInsertCmd.Flags().String(keyNote, "", "note to attach to balance")
 
 	accountBalanceCmd.Flags().VarP(balanceDate, keyDate, "d", "date at which to retrieve balance")
 
