@@ -39,6 +39,7 @@ func setup() {
 		err := postgres.CreateStorage(
 			viper.GetString(keyDBHost),
 			viper.GetString(keyDBUser),
+			"",
 			viper.GetString(keyDBName),
 			viper.GetString(keyDBSSLMode),
 		)

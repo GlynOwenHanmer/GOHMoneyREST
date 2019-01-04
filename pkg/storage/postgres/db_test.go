@@ -3,10 +3,9 @@
 package postgres
 
 import (
+	"database/sql"
 	"strings"
 	"testing"
-
-	"database/sql"
 
 	"github.com/glynternet/go-money/common"
 	"github.com/glynternet/mon/pkg/storage"
@@ -15,20 +14,22 @@ import (
 
 const (
 	host       = "localhost"
-	testDBName = "moneytest"
-	user       = "glynhanmer"
+	testDBName = "testdb"
+	user       = "testdbuser"
+	password   = "testdbpassword"
 	ssl        = "disable"
 )
 
 func TestNewConnectionString(t *testing.T) {
-	c, err := NewConnectionString("localhost", "user", "dbname", "disable")
+	c, err := NewConnectionString("localhost", "user", "password", "dbname", "disable")
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	expected := map[string]string{
-		"host":    "localhost",
-		"user":    "user",
-		"dbname":  "dbname",
-		"sslmode": "disable",
+		"host":     "localhost",
+		"user":     "user",
+		"password": "password",
+		"dbname":   "dbname",
+		"sslmode":  "disable",
 	}
 	ss := strings.Split(c, ` `)
 	assert.Len(t, ss, len(expected))
@@ -46,18 +47,18 @@ func TestNewConnectionString(t *testing.T) {
 }
 
 func TestCreateStorage_InvalidParamaters(t *testing.T) {
-	assert.NotNil(t, CreateStorage("", "user", "dbname", "sslmode"), "expected error for empty host")
-	assert.NotNil(t, CreateStorage("host", "", "dbname", "sslmode"), "expected error for empty storage owner")
+	assert.NotNil(t, CreateStorage("", "user", "password", "dbname", "sslmode"), "expected error for empty host")
+	assert.NotNil(t, CreateStorage("host", "", "password", "dbname", "sslmode"), "expected error for empty storage owner")
 }
 
 func TestDeleteStorage_InvalidParamaters(t *testing.T) {
-	assert.NotNil(t, DeleteStorage(host, user, "", ssl), "expected error for empty storage name")
+	assert.NotNil(t, DeleteStorage(host, user, password, "", ssl), "expected error for empty storage name")
 }
 
 func TestCreateAndDeleteStorage(t *testing.T) {
 	cs := adminConnectionString(t)
 
-	err := CreateStorage(host, user, testDBName, ssl)
+	err := CreateStorage(host, user, password, testDBName, ssl)
 	assert.Nil(t, err)
 
 	// Test DB has been created
@@ -72,7 +73,7 @@ func TestCreateAndDeleteStorage(t *testing.T) {
 	// TODO: Check that tables have been created
 	//SELECT table_schema,table_name FROM information_schema.tables WHERE table_schema = 'public';
 
-	err = DeleteStorage(host, user, testDBName, ssl)
+	err = DeleteStorage(host, user, password, testDBName, ssl)
 	common.FatalIfError(t, err, "deleting storage")
 
 	// Test DB no longer exists
@@ -92,22 +93,18 @@ func Test_createTestDB(t *testing.T) {
 //todo createTestDB should be given a base name for a db, which it should append a timestamp onto.
 // createTestDB prepares a DB connection to the test DB and return it, if possible, with any errors that occurred whilst preparing the connection.
 func createTestDB(t *testing.T) storage.Storage {
-	err := CreateStorage(host, user, testDBName, ssl)
+	err := CreateStorage(host, user, password, testDBName, ssl)
 	common.FatalIfError(t, err, "Error creating storage ")
 	var cs string
-	cs, err = NewConnectionString(host, user, testDBName, ssl)
+	cs, err = NewConnectionString(host, user, password, testDBName, ssl)
 	common.FatalIfError(t, err, "Error creating connection string for storage access")
 	db, err := New(cs)
 	common.FatalIfError(t, err, "Error creating DB connection")
 	return db
 }
 
-func deleteTestDBIgnorantly(t *testing.T) {
-	_ = DeleteStorage(host, user, testDBName, ssl)
-}
-
 func deleteTestDB(t *testing.T) {
-	err := DeleteStorage(host, user, testDBName, ssl)
+	err := DeleteStorage(host, user, password, testDBName, ssl)
 	common.FatalIfError(t, err, "Error deleting storage")
 }
 
@@ -121,7 +118,7 @@ func Test_isAvailable(t *testing.T) {
 }
 
 func adminConnectionString(t *testing.T) string {
-	cs, err := NewConnectionString(host, user, "", ssl)
+	cs, err := NewConnectionString(host, user, password, "", ssl)
 	common.FatalIfError(t, err, "generating new admin connection string")
 	return cs
 }
