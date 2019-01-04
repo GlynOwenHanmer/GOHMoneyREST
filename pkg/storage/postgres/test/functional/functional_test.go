@@ -19,10 +19,11 @@ import (
 
 const (
 	// viper keys
-	keyDBHost    = "db-host"
-	keyDBUser    = "db-user"
-	keyDBName    = "db-name"
-	keyDBSSLMode = "db-sslmode"
+	keyDBHost     = "db-host"
+	keyDBUser     = "db-user"
+	keyDBPassword = "db-password"
+	keyDBName     = "db-name"
+	keyDBSSLMode  = "db-sslmode"
 )
 
 func init() {
@@ -40,7 +41,7 @@ func setup() {
 		err := postgres.CreateStorage(
 			viper.GetString(keyDBHost),
 			viper.GetString(keyDBUser),
-			"",
+			viper.GetString(keyDBPassword),
 			viper.GetString(keyDBName),
 			viper.GetString(keyDBSSLMode),
 		)
@@ -67,7 +68,7 @@ func createStorage(t *testing.T) storage.Storage {
 	cs, err := postgres.NewConnectionString(
 		viper.GetString(keyDBHost),
 		viper.GetString(keyDBUser),
-		"",
+		viper.GetString(keyDBPassword),
 		viper.GetString(keyDBName),
 		viper.GetString(keyDBSSLMode),
 	)

@@ -10,7 +10,7 @@ services:
       - "5432"
     environment:
       ENV: docker
-      POSTGRES_PASSWORD: ""
+      POSTGRES_PASSWORD: testdbpass
       POSTGRES_USER: postgres
   functional-tests:
     container_name: ${TESTS_IMAGE_NAME}
@@ -22,5 +22,6 @@ services:
       ENV: docker
       DB_HOST: postgres
       DB_USER: postgres
+      DB_PASSWORD: testdbpass
       DB_NAME: functionaltest_dbname
       DB_SSLMODE: disable
