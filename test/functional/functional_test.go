@@ -14,7 +14,6 @@ import (
 )
 
 const (
-	// viper keys
 	keyServerHost = "SERVER_HOST"
 	keyDBHost     = "DB_HOST"
 	keyDBUser     = "DB_USER"
