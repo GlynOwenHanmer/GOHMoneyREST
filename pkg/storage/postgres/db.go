@@ -48,16 +48,13 @@ func NewConnectionString(host, user, dbname, sslmode string) (string, error) {
 		"dbname":  dbname,
 		"sslmode": sslmode,
 	}
-	cs := &bytes.Buffer{}
+	var pairs []string
 	for k, v := range kvs {
 		if len(v) > 0 {
-			_, err := fmt.Fprintf(cs, "%s=%s ", k, v)
-			if err != nil {
-				return "", err
-			}
+			pairs = append(pairs, fmt.Sprintf("%s=%s", k, v))
 		}
 	}
-	return strings.TrimSpace(cs.String()), nil
+	return strings.Join(pairs, " "), nil
 }
 
 type failSafeWriter struct {
