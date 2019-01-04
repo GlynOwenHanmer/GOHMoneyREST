@@ -15,13 +15,13 @@ import (
 
 func TestInsertBalance(t *testing.T) {
 	t.Run("validation error", func(t *testing.T) {
-		b, err := model.InsertBalance(nil, storage.Account{}, balance.Balance{})
+		b, err := model.InsertBalance(nil, storage.Account{}, balance.Balance{}, "test note")
 		assert.Nil(t, b)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "validating balance")
 	})
 
-	t.Run("id is passed", func(t *testing.T) {
+	t.Run("id and note are passed", func(t *testing.T) {
 		s := &storagetest.Storage{
 			Balance:    &storage.Balance{},
 			BalanceErr: errors.New("insert balance error"),
@@ -35,9 +35,11 @@ func TestInsertBalance(t *testing.T) {
 					accountingtest.NewCurrencyCode(t, "ABC"),
 					now),
 			},
-			balance.Balance{Date: now})
+			balance.Balance{Date: now},
+			"test note")
 		assert.Equal(t, s.BalanceErr, errors.Cause(err))
 		assert.Equal(t, s.Balance, b)
 		assert.Equal(t, uint(9183), s.LastAccountID)
+		assert.Equal(t, "test note", s.LastBalanceNote)
 	})
 }

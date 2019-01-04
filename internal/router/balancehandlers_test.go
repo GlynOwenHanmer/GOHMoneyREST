@@ -64,7 +64,7 @@ func TestServer_InsertBalance(t *testing.T) {
 		srv := environment{&storagetest.Storage{
 			AccountErr: expected,
 		}}
-		code, b, err := srv.insertBalance(0, balance.Balance{})
+		code, b, err := srv.insertBalance(0, balance.Balance{}, "")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "selecting account")
 		assert.Equal(t, http.StatusBadRequest, code)
@@ -83,7 +83,7 @@ func TestServer_InsertBalance(t *testing.T) {
 			Account:    account,
 			BalanceErr: expected,
 		}}
-		code, b, err := srv.insertBalance(0, balance)
+		code, b, err := srv.insertBalance(0, balance, "")
 		assert.Equal(t, expected, errors.Cause(err), "Actual error: %+v", err)
 		assert.Contains(t, err.Error(), "inserting balance")
 		assert.Equal(t, http.StatusBadRequest, code)
@@ -92,14 +92,16 @@ func TestServer_InsertBalance(t *testing.T) {
 
 	t.Run("all ok", func(t *testing.T) {
 		expected := &storage.Balance{}
-		srv := environment{&storagetest.Storage{
+		mockStore := storagetest.Storage{
 			Account: account,
 			Balance: expected,
-		}}
-		code, b, err := srv.insertBalance(0, balance)
+		}
+		srv := environment{&mockStore}
+		code, b, err := srv.insertBalance(0, balance, "test note")
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, code)
 		assert.Equal(t, expected, b)
+		assert.Equal(t, mockStore.LastBalanceNote, "test note")
 	})
 }
 

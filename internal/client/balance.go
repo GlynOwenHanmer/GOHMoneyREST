@@ -2,9 +2,8 @@ package client
 
 import (
 	"encoding/json"
-	"net/http"
-
 	"fmt"
+	"net/http"
 
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/mon/internal/router"
@@ -31,13 +30,19 @@ func (c Client) getBalancesFromEndpoint(e string) (*storage.Balances, error) {
 }
 
 // InsertBalance will insert a balance for a given Account
-func (c Client) InsertBalance(accountID uint, b balance.Balance) (*storage.Balance, error) {
+func (c Client) InsertBalance(accountID uint, b balance.Balance, note string) (*storage.Balance, error) {
 	endpoint := fmt.Sprintf(router.EndpointFmtAccountBalanceInsert, accountID)
-	bs, err := c.postBalanceToEndpoint(
-		endpoint, b,
-	)
+
+	res, err := c.postAsJSONToEndpoint(endpoint, router.BalanceInsertBody{
+		Balance: b,
+		Note:    note,
+	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "posting Balance to endpoint %s", endpoint)
+		return nil, errors.Wrapf(err, "posting BalanceInsertBody to endpoint:%s", endpoint)
+	}
+	bs, err := processResponseForBody(res)
+	if err != nil {
+		return nil, errors.Wrap(err, "processing response for body")
 	}
 	return unmarshalJSONToBalance(bs)
 }
@@ -53,14 +58,6 @@ func (c Client) DeleteBalance(id uint) error {
 		return fmt.Errorf("unexpected status code %d (%s)", r.StatusCode, http.StatusText(r.StatusCode))
 	}
 	return nil
-}
-
-func (c Client) postBalanceToEndpoint(e string, b balance.Balance) ([]byte, error) {
-	res, err := c.postAsJSONToEndpoint(e, b)
-	if err != nil {
-		return nil, errors.Wrap(err, "posting as JSON")
-	}
-	return processResponseForBody(res)
 }
 
 func unmarshalJSONToBalance(data []byte) (*storage.Balance, error) {
