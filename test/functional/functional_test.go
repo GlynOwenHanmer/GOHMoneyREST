@@ -5,44 +5,36 @@ package functional
 import (
 	"log"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/glynternet/mon/internal/client"
 	"github.com/glynternet/mon/pkg/storage/postgres"
 	"github.com/glynternet/mon/pkg/storage/storagetest"
-	"github.com/spf13/viper"
 )
 
 const (
 	// viper keys
-	keyServerHost = "server-host"
-	keyDBHost     = "db-host"
-	keyDBUser     = "db-user"
-	keyDBPassword = "db-password"
-	keyDBName     = "db-name"
-	keyDBSSLMode  = "db-sslmode"
+	keyServerHost = "SERVER_HOST"
+	keyDBHost     = "DB_HOST"
+	keyDBUser     = "DB_USER"
+	keyDBPassword = "DB_PASSWORD"
+	keyDBName     = "DB_NAME"
+	keyDBSSLMode  = "DB_SSLMODE"
 )
 
-func init() {
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
-	viper.AutomaticEnv() // read in environment variables that match
-	setup()
-}
-
-func setup() {
+func TestMain(m *testing.M) {
 	const retries = 10
 	const backoff = 2 * time.Second
 	errs := make([]error, retries)
 	var i int
 	for i = 0; i < retries; i++ {
 		err := postgres.CreateStorage(
-			viper.GetString(keyDBHost),
-			viper.GetString(keyDBUser),
-			viper.GetString(keyDBPassword),
-			viper.GetString(keyDBName),
-			viper.GetString(keyDBSSLMode),
+			os.Getenv(keyDBHost),
+			os.Getenv(keyDBUser),
+			os.Getenv(keyDBPassword),
+			os.Getenv(keyDBName),
+			os.Getenv(keyDBSSLMode),
 		)
 		if err == nil {
 			break
@@ -57,10 +49,11 @@ func setup() {
 		os.Exit(1)
 	}
 	log.Print("Setup complete")
+	os.Exit(m.Run())
 }
 
 func TestSuite(t *testing.T) {
-	host := viper.GetString(keyServerHost)
+	host := os.Getenv(keyServerHost)
 	store := client.Client(host)
 	if !store.Available() {
 		t.Fatalf("store at %q is unavailable", host)
