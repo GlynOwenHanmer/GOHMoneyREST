@@ -20,6 +20,7 @@ const (
 	keyServerHost = "server-host"
 	keyDBHost     = "db-host"
 	keyDBUser     = "db-user"
+	keyDBPassword = "db-password"
 	keyDBName     = "db-name"
 	keyDBSSLMode  = "db-sslmode"
 )
@@ -39,7 +40,7 @@ func setup() {
 		err := postgres.CreateStorage(
 			viper.GetString(keyDBHost),
 			viper.GetString(keyDBUser),
-			"",
+			viper.GetString(keyDBPassword),
 			viper.GetString(keyDBName),
 			viper.GetString(keyDBSSLMode),
 		)
