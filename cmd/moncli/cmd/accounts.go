@@ -25,7 +25,7 @@ import (
 const (
 	keyOpen       = "open"
 	keyIDs        = "ids"
-	keyNotIDs     = "not-ids"
+	keyExcludeIDs = "exclude-ids"
 	keyCurrencies = "currencies"
 	keyQuiet      = "quiet"
 	keyAtDate     = "at-date"
@@ -226,7 +226,7 @@ func init() {
 	rootCmd.AddCommand(accountsCmd)
 	accountsCmd.PersistentFlags().Bool(keyOpen, false, "show only open accounts")
 	accountsCmd.PersistentFlags().UintSliceVar(&ids, keyIDs, []uint{}, "include only these ids")
-	accountsCmd.PersistentFlags().UintSliceVar(&notIDs, keyNotIDs, []uint{}, "include only ids other than these")
+	accountsCmd.PersistentFlags().UintSliceVar(&notIDs, keyExcludeIDs, []uint{}, "exclude these ids")
 	accountsCmd.PersistentFlags().StringSliceVar(&currencies, keyCurrencies, []string{}, "filter by currencies")
 	accountsCmd.Flags().BoolP(keyQuiet, "q", false, "show only account ids")
 	accountsCmd.PersistentFlags().Var(atDate, keyAtDate, "show balances at a certain date")
