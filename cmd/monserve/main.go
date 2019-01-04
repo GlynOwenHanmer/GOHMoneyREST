@@ -19,11 +19,12 @@ const (
 	appName = "monserve"
 
 	// viper keys
-	keyPort      = "port"
-	keyDBHost    = "db-host"
-	keyDBUser    = "db-user"
-	keyDBName    = "db-name"
-	keyDBSSLMode = "db-sslmode"
+	keyPort       = "port"
+	keyDBHost     = "db-host"
+	keyDBUser     = "db-user"
+	keyDBPassword = "db-password"
+	keyDBName     = "db-name"
+	keyDBSSLMode  = "db-sslmode"
 )
 
 func main() {
@@ -39,6 +40,7 @@ func init() {
 	cmdDBServe.Flags().String(keyDBHost, "", "host address of the DB backend")
 	cmdDBServe.Flags().String(keyDBName, "", "name of the DB set to use")
 	cmdDBServe.Flags().String(keyDBUser, "", "DB user to authenticate with")
+	cmdDBServe.Flags().String(keyDBPassword, "", "DB password to authenticate with")
 	cmdDBServe.Flags().String(keyDBSSLMode, "", "DB SSL mode to use")
 	err := viper.BindPFlags(cmdDBServe.Flags())
 	if err != nil {
@@ -51,8 +53,8 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 }
 
-func newStorage(host, user, dbname, sslmode string) (storage.Storage, error) {
-	cs, err := postgres.NewConnectionString(host, user, dbname, sslmode)
+func newStorage(host, user, password, dbname, sslmode string) (storage.Storage, error) {
+	cs, err := postgres.NewConnectionString(host, user, password, dbname, sslmode)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection string: %v", err)
 	}
@@ -65,6 +67,7 @@ var cmdDBServe = &cobra.Command{
 		store, err := newStorage(
 			viper.GetString(keyDBHost),
 			viper.GetString(keyDBUser),
+			viper.GetString(keyDBPassword),
 			viper.GetString(keyDBName),
 			viper.GetString(keyDBSSLMode),
 		)

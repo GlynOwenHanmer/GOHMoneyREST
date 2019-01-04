@@ -30,38 +30,32 @@ type postgres struct {
 
 // NewConnectionString creates a new connection string for the postgres db
 // dbname can be an empty string when you are connecting to create the Storage
-func NewConnectionString(host, user, dbname, sslmode string) (s string, err error) {
+func NewConnectionString(host, user, password, dbname, sslmode string) (string, error) {
 	if len(strings.TrimSpace(host)) == 0 {
-		err = errors.New("storage host must be non-whitespace and longer than 0 characters")
-		return
+		return "", errors.New("storage host must be non-whitespace and longer than 0 characters")
 	}
 	if len(strings.TrimSpace(user)) == 0 {
-		err = errors.New("storage user must be non-whitespace and longer than 0 characters")
-		return
+		return "", errors.New("storage user must be non-whitespace and longer than 0 characters")
 	}
 	switch sslmode {
 	case "enable", "disable":
 	default:
-		err = errors.New("storage sslmode must be value enable or disable")
-		return
+		return "", errors.New("storage sslmode must be value enable or disable")
 	}
 	kvs := map[string]string{
-		"host":    host,
-		"user":    user,
-		"dbname":  dbname,
-		"sslmode": sslmode,
+		"host":     host,
+		"user":     user,
+		"dbname":   dbname,
+		"sslmode":  sslmode,
+		"password": password,
 	}
-	cs := &bytes.Buffer{}
+	var pairs []string
 	for k, v := range kvs {
 		if len(v) > 0 {
-			_, err = fmt.Fprintf(cs, "%s=%s ", k, v)
-			if err != nil {
-				return
-			}
+			pairs = append(pairs, fmt.Sprintf("%s=%s", k, v))
 		}
 	}
-	s = strings.TrimSpace(cs.String())
-	return
+	return strings.Join(pairs, " "), nil
 }
 
 type failSafeWriter struct {
@@ -79,12 +73,12 @@ func (w *failSafeWriter) writef(format string, args ...interface{}) {
 
 // CreateStorage will create all the necessary tables to use postgres as a
 // backend.
-func CreateStorage(host, user, dbname, sslmode string) error {
-	adminConnect, err := NewConnectionString(host, user, "", sslmode)
+func CreateStorage(host, user, password, dbname, sslmode string) error {
+	adminConnect, err := NewConnectionString(host, user, password, "", sslmode)
 	if err != nil {
 		return errors.Wrap(err, "creating admin connection string")
 	}
-	userConnect, err := NewConnectionString(host, user, dbname, sslmode)
+	userConnect, err := NewConnectionString(host, user, password, dbname, sslmode)
 	if err != nil {
 		return errors.Wrap(err, "creating user connection string")
 	}
@@ -182,11 +176,11 @@ func createBalancesTable(connection string) error {
 }
 
 // DeleteStorage deletes the database used for the backend.
-func DeleteStorage(host, user, name, sslmode string) error {
+func DeleteStorage(host, user, password, name, sslmode string) error {
 	if len(strings.TrimSpace(name)) == 0 {
 		return errors.New("storage name must be non-whitespace and longer than 0 characters")
 	}
-	adminConnect, err := NewConnectionString(host, user, "", sslmode)
+	adminConnect, err := NewConnectionString(host, user, password, "", sslmode)
 	if err != nil {
 		return err
 	}
