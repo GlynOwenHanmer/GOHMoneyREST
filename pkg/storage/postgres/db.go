@@ -30,20 +30,17 @@ type postgres struct {
 
 // NewConnectionString creates a new connection string for the postgres db
 // dbname can be an empty string when you are connecting to create the Storage
-func NewConnectionString(host, user, dbname, sslmode string) (s string, err error) {
+func NewConnectionString(host, user, dbname, sslmode string) (string, error) {
 	if len(strings.TrimSpace(host)) == 0 {
-		err = errors.New("storage host must be non-whitespace and longer than 0 characters")
-		return
+		return "", errors.New("storage host must be non-whitespace and longer than 0 characters")
 	}
 	if len(strings.TrimSpace(user)) == 0 {
-		err = errors.New("storage user must be non-whitespace and longer than 0 characters")
-		return
+		return "", errors.New("storage user must be non-whitespace and longer than 0 characters")
 	}
 	switch sslmode {
 	case "enable", "disable":
 	default:
-		err = errors.New("storage sslmode must be value enable or disable")
-		return
+		return "", errors.New("storage sslmode must be value enable or disable")
 	}
 	kvs := map[string]string{
 		"host":    host,
@@ -54,14 +51,13 @@ func NewConnectionString(host, user, dbname, sslmode string) (s string, err erro
 	cs := &bytes.Buffer{}
 	for k, v := range kvs {
 		if len(v) > 0 {
-			_, err = fmt.Fprintf(cs, "%s=%s ", k, v)
+			_, err := fmt.Fprintf(cs, "%s=%s ", k, v)
 			if err != nil {
-				return
+				return "", err
 			}
 		}
 	}
-	s = strings.TrimSpace(cs.String())
-	return
+	return strings.TrimSpace(cs.String()), nil
 }
 
 type failSafeWriter struct {
