@@ -35,6 +35,6 @@ test-binary-version-output:
 
 image:
 	docker build \
-	--tag $(APP_NAME):$(VERSION) \
+	--tag glynhanmer/$(APP_NAME):$(VERSION) \
 	--build-arg APP_NAME=$(APP_NAME) \
 	.
