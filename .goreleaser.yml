@@ -1,12 +1,12 @@
 builds:
-# - binary: moncli
-#   ldflags:
-#      - -w -X github.com/glynternet/mon/cmd/moncli/cmd.version={{.Version}}
-#   main: ./cmd/moncli
-#   env:
-#   - CGO_ENABLED=0
-#   goarch:
-#     - amd64
+- binary: moncli
+  ldflags:
+     - -w -X github.com/glynternet/mon/cmd/moncli/cmd.version={{.Version}}
+  main: ./cmd/moncli
+  env:
+  - CGO_ENABLED=0
+  goarch:
+    - amd64
 - binary: monserve
   ldflags:
      - -w -X main.version={{.Version}}
@@ -23,10 +23,10 @@ changelog:
   sort: asc
 
 dockers:
-# - binary: moncli
-#   dockerfile: bin/Dockerfile.moncli
-#   image_templates:
-#   - 'glynhanmer/{{.Binary}}:{{ .Tag }}'
+- binary: moncli
+  dockerfile: bin/Dockerfile.moncli
+  image_templates:
+  - 'glynhanmer/{{.Binary}}:{{ .Tag }}'
 - binary: monserve
   dockerfile: bin/Dockerfile.monserve
   image_templates:
