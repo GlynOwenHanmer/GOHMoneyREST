@@ -6,40 +6,40 @@ workspace:
 
 pipeline:
 
-  run-unit-tests:
-    image: golang:1.10.4
-    commands:
-      - go test -v -race ./...
+  # run-unit-tests:
+  #   image: golang:1.10.4
+  #   commands:
+  #     - go test -v -race ./...
 
-  # drone mounts the root directory of the repository to the container and sets
-  # it as the working directory
-  run-linters:
-    image: glynhanmer/go-linters:1.10.3-alpine3.7-v0.2.0
-    environment: 
-      - CONCURRENCY=1
+  # # drone mounts the root directory of the repository to the container and sets
+  # # it as the working directory
+  # run-linters:
+  #   image: glynhanmer/go-linters:1.10.3-alpine3.7-v0.2.0
+  #   environment: 
+  #     - CONCURRENCY=1
 
-  build-storage-postgres-functional-tests-binary:
-    image: golang:1.10.4
-    commands:
-      - make -C pkg/storage/postgres/test/functional build-tests-binary
+  # build-storage-postgres-functional-tests-binary:
+  #   image: golang:1.10.4
+  #   commands:
+  #     - make -C pkg/storage/postgres/test/functional build-tests-binary
 
-  run-storage-postgres-functional-tests:
-    image: docker/compose:1.21.2
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - TESTS_IMAGE_NAME=mon-pkg-storage-postgres-functional-tests
-      - TESTS_IMAGE=mon-pkg-storage-postgres-functional-tests:${DRONE_COMMIT_SHA:-NO_SHA}
-    commands:
-      - cd pkg/storage/postgres/test/functional
-      - docker-compose --project-name mon-pkg-storage-postgres-functional-test down
-      - docker-compose --project-name mon-pkg-storage-postgres-functional-test up --build --abort-on-container-exit --force-recreate
-      - docker-compose --project-name mon-pkg-storage-postgres-functional-test down
+  # run-storage-postgres-functional-tests:
+  #   image: docker/compose:1.21.2
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - TESTS_IMAGE_NAME=mon-pkg-storage-postgres-functional-tests
+  #     - TESTS_IMAGE=mon-pkg-storage-postgres-functional-tests:${DRONE_COMMIT_SHA:-NO_SHA}
+  #   commands:
+  #     - cd pkg/storage/postgres/test/functional
+  #     - docker-compose --project-name mon-pkg-storage-postgres-functional-test down
+  #     - docker-compose --project-name mon-pkg-storage-postgres-functional-test up --build --abort-on-container-exit --force-recreate
+  #     - docker-compose --project-name mon-pkg-storage-postgres-functional-test down
 
-  build-monserve-binary:
-    image: golang:1.10.4
-    commands:
-      - make binary APP_NAME=monserve VERSION_VAR=main.version
+  # build-monserve-binary:
+  #   image: golang:1.10.4
+  #   commands:
+  #     - make binary APP_NAME=monserve VERSION_VAR=main.version
   
   generate-dockerfiles:
     image: golang:1.10.4
@@ -47,35 +47,37 @@ pipeline:
       - make Dockerfile.monserve
       - make Dockerfile.moncli
 
-  build-monserve-image:
-    image: docker
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    commands:
-      - docker build --tag monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA} -f ./bin/Dockerfile.monserve ./bin
+  # build-monserve-image:
+  #   image: docker
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   commands:
+  #     - docker build --tag monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA} -f ./bin/Dockerfile.monserve ./bin
   
-  build-monserve-client-functional-tests-binary:
-    image: golang:1.10.4
-    commands:
-      - make -C test/functional build-tests
+  # build-monserve-client-functional-tests-binary:
+  #   image: golang:1.10.4
+  #   commands:
+  #     - make -C test/functional build-tests
   
-  run-monserve-client-functional-tests:
-    image: docker/compose:1.21.2
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - MONSERVE_IMAGE=monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA}
-    commands:
-      - cd test/functional
-      - docker-compose --project-name mon-monserve-client-functional-test down
-      - docker-compose --project-name mon-monserve-client-functional-test up --build --abort-on-container-exit --force-recreate
-      - docker-compose --project-name mon-monserve-client-functional-test down
+  # run-monserve-client-functional-tests:
+  #   image: docker/compose:1.21.2
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - MONSERVE_IMAGE=monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA}
+  #   commands:
+  #     - cd test/functional
+  #     - docker-compose --project-name mon-monserve-client-functional-test down
+  #     - docker-compose --project-name mon-monserve-client-functional-test up --build --abort-on-container-exit --force-recreate
+  #     - docker-compose --project-name mon-monserve-client-functional-test down
 
   release:
     image: goreleaser/goreleaser:v0.95
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     secrets: [ github_token ]
     commands:
       - git fetch --no-tags origin +refs/tags/${DRONE_TAG}:refs/tags/${DRONE_TAG}
-      - goreleaser release --rm-dist
+      - goreleaser release --debug --rm-dist
     when:
       event: tag
