@@ -46,4 +46,4 @@ image:
 	docker build \
 		--tag glynhanmer/$(APP_NAME):$(VERSION) \
 		-f $(BUILD_DIR)/Dockerfile.$(APP_NAME) \
-		.
+		./bin

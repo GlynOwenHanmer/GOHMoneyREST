@@ -23,9 +23,11 @@ changelog:
   sort: asc
 
 dockers:
-  - binary: moncli
-    image_templates:
-      - "myuser/{{.Binary}}"
-  - binary: monserve
-    image_templates:
-      - "myuser/{{.Binary}}"
+- binary: moncli
+  dockerfile: bin/Dockerfile.moncli
+  image_templates:
+  - 'glynhanmer/{{.Binary}}:{{ .Tag }}'
+- binary: monserve
+  dockerfile: bin/Dockerfile.monserve
+  image_templates:
+  - 'glynhanmer/{{.Binary}}:{{ .Tag }}'

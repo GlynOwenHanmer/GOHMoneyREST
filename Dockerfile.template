@@ -1,5 +1,5 @@
 FROM scratch
 
-COPY ./bin/{{APP_NAME}} /{{APP_NAME}}
+COPY ./{{APP_NAME}} /{{APP_NAME}}
 
 ENTRYPOINT [ "/{{APP_NAME}}" ]
