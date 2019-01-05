@@ -21,3 +21,11 @@ snapshot:
   name_template: "SNAPSHOT-{{ .Tag }}-{{ .Commit }}"
 changelog:
   sort: asc
+
+dockers:
+  - binary: moncli
+    image_templates:
+      - "myuser/{{.Binary}}"
+  - binary: monserve
+    image_templates:
+      - "myuser/{{.Binary}}"
