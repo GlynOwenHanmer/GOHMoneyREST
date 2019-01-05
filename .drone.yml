@@ -44,7 +44,6 @@ pipeline:
   generate-dockerfiles:
     image: golang:1.10.4
     commands:
-      - mkdir bin
       - make Dockerfile.monserve
       - make Dockerfile.moncli
 
