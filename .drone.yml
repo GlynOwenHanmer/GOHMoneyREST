@@ -76,7 +76,7 @@ pipeline:
     image: goreleaser/goreleaser:v0.95
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    secrets: [ github_token ]
+    secrets: [ github_token, docker_username, docker_password ]
     commands:
       - git fetch --no-tags origin +refs/tags/${DRONE_TAG}:refs/tags/${DRONE_TAG}
       - goreleaser release --debug --rm-dist
