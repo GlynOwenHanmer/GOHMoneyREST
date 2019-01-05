@@ -13,6 +13,9 @@ ARCH ?= amd64
 
 build: moncli monserve
 
+clean:
+	rm $(BUILD_DIR)/*
+
 monserve:
 	$(MAKE) cmd-all \
 		APP_NAME=monserve \
@@ -23,7 +26,7 @@ moncli:
 		APP_NAME=moncli \
 		VERSION_VAR=github.com/glynternet/mon/cmd/moncli/cmd.version
 
-cmd-all: binary test-binary-version-output image
+cmd-all: binary test-binary-version-output dockerfile image
 
 binary:
 	$(GOBUILD_CMD) -o $(BUILD_DIR)/$(APP_NAME) ./cmd/$(APP_NAME)
@@ -33,8 +36,14 @@ test-binary-version-output:
 	@echo testing output of $(VERSION_CMD)
 	test "$(shell $(VERSION_CMD))" = "$(VERSION)" && echo PASSED
 
+dockerfile:
+	$(MAKE) Dockerfile.$(APP_NAME)
+
+Dockerfile.%:
+	sed 's/{{APP_NAME}}/$(subst Dockerfile.,,$@)/g' Dockerfile.template > $(BUILD_DIR)/$@
+
 image:
 	docker build \
-	--tag glynhanmer/$(APP_NAME):$(VERSION) \
-	--build-arg APP_NAME=$(APP_NAME) \
-	.
+		--tag glynhanmer/$(APP_NAME):$(VERSION) \
+		-f $(BUILD_DIR)/Dockerfile.$(APP_NAME) \
+		./bin

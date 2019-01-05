@@ -1,0 +1,5 @@
+FROM scratch
+
+COPY ./{{APP_NAME}} /{{APP_NAME}}
+
+ENTRYPOINT [ "/{{APP_NAME}}" ]

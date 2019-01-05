@@ -41,12 +41,18 @@ pipeline:
     commands:
       - make binary APP_NAME=monserve VERSION_VAR=main.version
   
+  generate-dockerfiles:
+    image: golang:1.10.4
+    commands:
+      - make Dockerfile.monserve
+      - make Dockerfile.moncli
+
   build-monserve-image:
     image: docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     commands:
-      - docker build --build-arg APP_NAME=monserve --tag monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA} .
+      - docker build --tag monserve:ci-functional-tests-${DRONE_COMMIT_SHA:-NO_SHA} -f ./bin/Dockerfile.monserve ./bin
   
   build-monserve-client-functional-tests-binary:
     image: golang:1.10.4
@@ -66,9 +72,13 @@ pipeline:
       - docker-compose --project-name mon-monserve-client-functional-test down
 
   release:
-    image: goreleaser/goreleaser:v0.86
-    secrets: [ github_token ]
+    image: goreleaser/goreleaser:v0.95
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    secrets: [ github_token, docker_username, docker_password ]
     commands:
+      # login required because of running within docker image
+      - echo $DOCKER_PASSWORD | docker login --username=$DOCKER_USERNAME --password-stdin
       - git fetch --no-tags origin +refs/tags/${DRONE_TAG}:refs/tags/${DRONE_TAG}
       - goreleaser release --rm-dist
     when:
