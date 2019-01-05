@@ -78,7 +78,8 @@ pipeline:
       - /var/run/docker.sock:/var/run/docker.sock
     secrets: [ github_token, docker_username, docker_password ]
     commands:
-      - docker login --username=$DOCKER_USERNAME --password $DOCKER_PASSWORD
+      # login required because of running within docker image
+      - echo $DOCKER_PASSWORD | docker login --username=$DOCKER_USERNAME --password-stdin
       - git fetch --no-tags origin +refs/tags/${DRONE_TAG}:refs/tags/${DRONE_TAG}
       - goreleaser release --debug --rm-dist
     when:
