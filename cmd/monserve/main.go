@@ -66,10 +66,10 @@ func newStorage(host, user, password, dbname, sslmode string) (storage.Storage, 
 	return postgres.New(cs)
 }
 
-// newServer returns a function that can be used to start a server.
-// newServer will provide an HTTPS server if either the given certPath or
-// keyPath are non-empty, otherwise newServer will provide an HTTP server.
-func newServer(certPath, keyPath string) func(string, http.Handler) error {
+// newServeFn returns a function that can be used to start a server.
+// newServeFn will provide an HTTPS server if either the given certPath or
+// keyPath are non-empty, otherwise newServeFn will provide an HTTP server.
+func newServeFn(certPath, keyPath string) func(string, http.Handler) error {
 	if len(certPath) == 0 && len(keyPath) == 0 {
 		log.Printf("Using HTTP")
 		return http.ListenAndServe
@@ -98,12 +98,12 @@ var cmdDBServe = &cobra.Command{
 			return errors.Wrap(err, "error creating new server")
 		}
 
-		serve := newServer(
+		serveFn := newServeFn(
 			viper.GetString(keySSLCertificate),
 			viper.GetString(keySSLKey),
 		)
 		addr := ":" + viper.GetString(keyPort)
 		log.Printf("Serving at %s", addr)
-		return serve(addr, r)
+		return serveFn(addr, r)
 	},
 }
