@@ -28,13 +28,6 @@ const (
 )
 
 func main() {
-	if err := cmdDBServe.Execute(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-}
-
-func init() {
 	cobra.OnInitialize(initConfig)
 	cmdDBServe.Flags().String(keyPort, "80", "server listening port")
 	cmdDBServe.Flags().String(keyDBHost, "", "host address of the DB backend")
@@ -45,6 +38,12 @@ func init() {
 	err := viper.BindPFlags(cmdDBServe.Flags())
 	if err != nil {
 		log.Printf("unable to BindPFlags: %v", err)
+		os.Exit(1)
+	}
+
+	if err := cmdDBServe.Execute(); err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
 }
 
