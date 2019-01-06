@@ -30,14 +30,7 @@ const (
 )
 
 func main() {
-	if err := cmdDBServe.Execute(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-}
-
-func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(viperAutoEnvVar)
 	cmdDBServe.Flags().String(keyPort, "80", "server listening port")
 	cmdDBServe.Flags().String(keySSLCertificate, "", "path to SSL certificate, leave empty for http")
 	cmdDBServe.Flags().String(keySSLKey, "", "path to SSL key, leave empty for https")
@@ -49,10 +42,16 @@ func init() {
 	err := viper.BindPFlags(cmdDBServe.Flags())
 	if err != nil {
 		log.Printf("unable to BindPFlags: %v", err)
+		os.Exit(1)
+	}
+
+	if err := cmdDBServe.Execute(); err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
 }
 
-func initConfig() {
+func viperAutoEnvVar() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv() // read in environment variables that match
 }
