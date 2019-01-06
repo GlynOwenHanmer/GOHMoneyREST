@@ -98,7 +98,10 @@ var cmdDBServe = &cobra.Command{
 			return errors.Wrap(err, "error creating new server")
 		}
 
-		serve := newServer("", "")
+		serve := newServer(
+			viper.GetString(keySSLCertificate),
+			viper.GetString(keySSLKey),
+		)
 		addr := ":" + viper.GetString(keyPort)
 		log.Printf("Serving at %s", addr)
 		return serve(addr, r)
