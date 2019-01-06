@@ -28,7 +28,7 @@ const (
 )
 
 func main() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(viperAutoEnvVar)
 	cmdDBServe.Flags().String(keyPort, "80", "server listening port")
 	cmdDBServe.Flags().String(keyDBHost, "", "host address of the DB backend")
 	cmdDBServe.Flags().String(keyDBName, "", "name of the DB set to use")
@@ -47,7 +47,7 @@ func main() {
 	}
 }
 
-func initConfig() {
+func viperAutoEnvVar() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv() // read in environment variables that match
 }
