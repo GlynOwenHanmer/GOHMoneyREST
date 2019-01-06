@@ -71,8 +71,10 @@ func newStorage(host, user, password, dbname, sslmode string) (storage.Storage, 
 // keyPath are non-empty, otherwise newServer will provide an HTTP server.
 func newServer(certPath, keyPath string) func(string, http.Handler) error {
 	if len(certPath) == 0 && len(keyPath) == 0 {
+		log.Printf("Using HTTP")
 		return http.ListenAndServe
 	}
+	log.Printf("Using HTTPS")
 	return func(addr string, handler http.Handler) error {
 		return http.ListenAndServeTLS(addr, certPath, keyPath, handler)
 	}
@@ -97,6 +99,8 @@ var cmdDBServe = &cobra.Command{
 		}
 
 		serve := newServer("", "")
-		return serve(":"+viper.GetString(keyPort), r)
+		addr := ":" + viper.GetString(keyPort)
+		log.Printf("Serving at %s", addr)
+		return serve(addr, r)
 	},
 }
