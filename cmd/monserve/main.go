@@ -46,7 +46,6 @@ func init() {
 	cmdDBServe.Flags().String(keyDBUser, "", "DB user to authenticate with")
 	cmdDBServe.Flags().String(keyDBPassword, "", "DB password to authenticate with")
 	cmdDBServe.Flags().String(keyDBSSLMode, "", "DB SSL mode to use")
-
 	err := viper.BindPFlags(cmdDBServe.Flags())
 	if err != nil {
 		log.Printf("unable to BindPFlags: %v", err)
