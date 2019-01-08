@@ -16,20 +16,13 @@
 [[projects]]
   branch = "master"
   name = "github.com/glynternet/go-accounting"
-  packages = [
-    "account",
-    "accountingtest",
-    "balance"
-  ]
+  packages = ["account","accountingtest","balance"]
   revision = "f7cd0cb863a1c2334d0dc782aa554d4f685f6280"
 
 [[projects]]
   branch = "master"
   name = "github.com/glynternet/go-money"
-  packages = [
-    "common",
-    "currency"
-  ]
+  packages = ["common","currency"]
   revision = "95ce07f4b89426d1df4b44f6493e366dd9322e07"
 
 [[projects]]
@@ -53,18 +46,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/hashicorp/hcl"
-  packages = [
-    ".",
-    "hcl/ast",
-    "hcl/parser",
-    "hcl/printer",
-    "hcl/scanner",
-    "hcl/strconv",
-    "hcl/token",
-    "json/parser",
-    "json/scanner",
-    "json/token"
-  ]
+  packages = [".","hcl/ast","hcl/parser","hcl/printer","hcl/scanner","hcl/strconv","hcl/token","json/parser","json/scanner","json/token"]
   revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
 
 [[projects]]
@@ -76,10 +58,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/lib/pq"
-  packages = [
-    ".",
-    "oid"
-  ]
+  packages = [".","oid"]
   revision = "d34b9ff171c21ad295489235aec8b6626023cd04"
 
 [[projects]]
@@ -126,10 +105,7 @@
 
 [[projects]]
   name = "github.com/spf13/afero"
-  packages = [
-    ".",
-    "mem"
-  ]
+  packages = [".","mem"]
   revision = "63644898a8da0bc22138abf860edaf5277b6102e"
   version = "v1.1.0"
 
@@ -171,22 +147,27 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ed25519","ed25519/internal/edwards25519","pbkdf2"]
+  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
   revision = "7f59abf37be6a6007f075af1bc7f16f137bc176b"
 
 [[projects]]
   name = "golang.org/x/text"
-  packages = [
-    "internal/gen",
-    "internal/triegen",
-    "internal/ucd",
-    "transform",
-    "unicode/cldr",
-    "unicode/norm"
-  ]
+  packages = ["internal/gen","internal/triegen","internal/ucd","transform","unicode/cldr","unicode/norm"]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
+
+[[projects]]
+  name = "gopkg.in/square/go-jose.v2"
+  packages = [".","cipher","json","jwt"]
+  revision = "e94fb177d3668d35ab39c61cbb2f311550557e83"
+  version = "v2.2.2"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
@@ -197,6 +178,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8b20c2da39aa2b47f643cd5bc134babba66f1d7007661230e4f54079d71ced80"
+  inputs-digest = "8a8ef0ee834ae2236d5fe6ba242ed7a06b5ee7c70c6b9eacb7a3130f56e2abf3"
   solver-name = "gps-cdcl"
   solver-version = 1
