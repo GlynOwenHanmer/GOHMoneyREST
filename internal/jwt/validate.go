@@ -9,10 +9,10 @@ import (
 
 // Validate creates an http.HandlerFunc that will validate a request and its
 // JWT.  On successful validation, the token will be passed to the given
-// TokenHandler.
+// TokenHandlerFunc.
 // The generated HandlerFunc will panic if either the given RequestValidator or
 // next http.Handler are nil.
-func Validate(logger *log.Logger, rv RequestValidator, next TokenHandler) http.HandlerFunc {
+func Validate(logger *log.Logger, rv RequestValidator, next TokenHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		t, err := rv.ValidateRequest(r)
 		if err != nil {
@@ -32,5 +32,5 @@ type RequestValidator interface {
 	ValidateRequest(r *http.Request) (*jwt.JSONWebToken, error)
 }
 
-// TokenHandler is handler that will use a token within its logic
-type TokenHandler func(*jwt.JSONWebToken, http.ResponseWriter, *http.Request)
+// TokenHandlerFunc is handler that will use a token within its logic
+type TokenHandlerFunc func(*jwt.JSONWebToken, http.ResponseWriter, *http.Request)
