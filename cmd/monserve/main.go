@@ -30,6 +30,37 @@ const (
 )
 
 func main() {
+	logger := log.New(os.Stderr, "", log.LstdFlags)
+
+	var cmdDBServe = &cobra.Command{
+		Use: appName,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			store, err := newStorage(
+				viper.GetString(keyDBHost),
+				viper.GetString(keyDBUser),
+				viper.GetString(keyDBPassword),
+				viper.GetString(keyDBName),
+				viper.GetString(keyDBSSLMode),
+			)
+			if err != nil {
+				return errors.Wrap(err, "error creating storage")
+			}
+			r, err := router.New(store, logger)
+			if err != nil {
+				return errors.Wrap(err, "error creating new server")
+			}
+
+			serveFn := newServeFn(
+				logger,
+				viper.GetString(keySSLCertificate),
+				viper.GetString(keySSLKey),
+			)
+			addr := ":" + viper.GetString(keyPort)
+			logger.Printf("Serving at %s", addr)
+			return serveFn(addr, r)
+		},
+	}
+
 	cobra.OnInitialize(viperAutoEnvVar)
 	cmdDBServe.Flags().String(keyPort, "80", "server listening port")
 	cmdDBServe.Flags().String(keySSLCertificate, "", "path to SSL certificate, leave empty for http")
@@ -41,12 +72,12 @@ func main() {
 	cmdDBServe.Flags().String(keyDBSSLMode, "", "DB SSL mode to use")
 	err := viper.BindPFlags(cmdDBServe.Flags())
 	if err != nil {
-		log.Printf("unable to BindPFlags: %v", err)
+		logger.Printf("unable to BindPFlags: %v", err)
 		os.Exit(1)
 	}
 
 	if err := cmdDBServe.Execute(); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		os.Exit(1)
 	}
 }
@@ -67,42 +98,13 @@ func newStorage(host, user, password, dbname, sslmode string) (storage.Storage, 
 // newServeFn returns a function that can be used to start a server.
 // newServeFn will provide an HTTPS server if either the given certPath or
 // keyPath are non-empty, otherwise newServeFn will provide an HTTP server.
-func newServeFn(certPath, keyPath string) func(string, http.Handler) error {
+func newServeFn(logger *log.Logger, certPath, keyPath string) func(string, http.Handler) error {
 	if len(certPath) == 0 && len(keyPath) == 0 {
-		log.Printf("Using HTTP")
+		logger.Printf("Using HTTP")
 		return http.ListenAndServe
 	}
-	log.Printf("Using HTTPS")
+	logger.Printf("Using HTTPS")
 	return func(addr string, handler http.Handler) error {
 		return http.ListenAndServeTLS(addr, certPath, keyPath, handler)
 	}
-}
-
-var cmdDBServe = &cobra.Command{
-	Use: appName,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		store, err := newStorage(
-			viper.GetString(keyDBHost),
-			viper.GetString(keyDBUser),
-			viper.GetString(keyDBPassword),
-			viper.GetString(keyDBName),
-			viper.GetString(keyDBSSLMode),
-		)
-		if err != nil {
-			return errors.Wrap(err, "error creating storage")
-		}
-		log := log.New(os.Stderr, "", log.LstdFlags)
-		r, err := router.New(store, log)
-		if err != nil {
-			return errors.Wrap(err, "error creating new server")
-		}
-
-		serveFn := newServeFn(
-			viper.GetString(keySSLCertificate),
-			viper.GetString(keySSLKey),
-		)
-		addr := ":" + viper.GetString(keyPort)
-		log.Printf("Serving at %s", addr)
-		return serveFn(addr, r)
-	},
 }
