@@ -15,15 +15,15 @@ import (
 
 type mockTokenHandler struct {
 	called  bool
+	writer  http.ResponseWriter
 	request *http.Request
 	token   *josejwt.JSONWebToken
 }
 
 func (h *mockTokenHandler) ServeHTTP(t *josejwt.JSONWebToken, w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	h.called = true
-	h.request = r
 	h.token = t
+	h.writer = w
+	h.request = r
 }
 
 type mockRequestValidator struct {
@@ -70,8 +70,8 @@ func TestValidate(t *testing.T) {
 		hf(w, r)
 
 		assert.Equal(t, "", buf.String())
-		assert.Equal(t, http.StatusOK, w.Code)
 		assert.True(t, true, next.called)
 		assert.Equal(t, r, next.request)
+		assert.Equal(t, r, next.writer)
 	})
 }
