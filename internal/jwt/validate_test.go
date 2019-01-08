@@ -14,7 +14,6 @@ import (
 )
 
 type mockTokenHandler struct {
-	called  bool
 	writer  http.ResponseWriter
 	request *http.Request
 	token   *josejwt.JSONWebToken
@@ -53,7 +52,9 @@ func TestValidate(t *testing.T) {
 
 		assert.Equal(t, "Unauthorised request: invalid request\n", buf.String())
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
-		assert.False(t, next.called)
+		assert.Nil(t, next.token)
+		assert.Nil(t, next.writer)
+		assert.Nil(t, next.request)
 	})
 
 	t.Run("valid", func(t *testing.T) {
@@ -70,8 +71,8 @@ func TestValidate(t *testing.T) {
 		hf(w, r)
 
 		assert.Equal(t, "", buf.String())
-		assert.True(t, true, next.called)
+		assert.Equal(t, requestValidator.token, next.token)
 		assert.Equal(t, r, next.request)
-		assert.Equal(t, r, next.writer)
+		assert.Equal(t, w, next.writer)
 	})
 }
