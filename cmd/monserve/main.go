@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/glynternet/mon/internal/router"
+	"github.com/glynternet/mon/internal/versioncmd"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/glynternet/mon/pkg/storage/postgres"
 	"github.com/pkg/errors"
@@ -28,6 +29,9 @@ const (
 	keyDBName         = "db-name"
 	keyDBSSLMode      = "db-sslmode"
 )
+
+// to be changed using ldflags with the go build command
+var version = "unknown"
 
 func main() {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
@@ -60,6 +64,8 @@ func main() {
 			return serveFn(addr, r)
 		},
 	}
+
+	cmdDBServe.AddCommand(versioncmd.New(version, os.Stdout))
 
 	cobra.OnInitialize(viperAutoEnvVar)
 	cmdDBServe.Flags().String(keyPort, "80", "server listening port")
