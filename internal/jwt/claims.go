@@ -35,6 +35,9 @@ func AuthoriseClaims(logger *log.Logger, ce ClaimsExtractor, ca ClaimsAuthoriser
 	}
 }
 
+// ClaimsAuthoriser generates a new claims object, which should have the token
+// claims json unmarshalled into it, and authorises the claims, returning an
+// error for unauthorised claims.
 type ClaimsAuthoriser interface {
 	// NewClaims provides an object that the claims of the JWT token can
 	// be json unmarshalled into.
