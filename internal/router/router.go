@@ -53,19 +53,19 @@ const (
 )
 
 // New creates a new mux.Router and initialises it with generateRoutes for the store
-func New(store storage.Storage) (*mux.Router, error) {
+func New(store storage.Storage, log *log.Logger) (*mux.Router, error) {
 	if store == nil {
 		return nil, errors.New("nil store")
 	}
 	rs := generateRoutes(environment{storage: store})
-	return newRouter(rs)
+	return newRouter(rs, log)
 }
 
 // New creates a new Router and initialises it will all of the global generateRoutes
-func newRouter(rs []route) (*mux.Router, error) {
+func newRouter(rs []route, log *log.Logger) (*mux.Router, error) {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range rs {
-		handler := logger(route.appHandler, route.name)
+		handler := logger(log, route.appHandler, route.name)
 		router.
 			Methods(route.method).
 			Path(route.pattern).

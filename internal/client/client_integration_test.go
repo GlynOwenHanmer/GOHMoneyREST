@@ -1,8 +1,10 @@
 package client
 
 import (
+	"log"
 	"net"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -206,7 +208,7 @@ func newTestComponents(t *testing.T, s storage.Storage) (*mux.Router, net.Listen
 }
 
 func newTestRouter(t *testing.T, s storage.Storage) *mux.Router {
-	r, err := router.New(s)
+	r, err := router.New(s, log.New(os.Stderr, "", log.LstdFlags))
 	common.FatalIfError(t, err, "creating new router")
 	if !assert.NotNil(t, r) {
 		t.Fatal("expected non-nil router")
