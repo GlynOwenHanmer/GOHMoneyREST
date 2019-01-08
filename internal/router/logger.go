@@ -7,7 +7,7 @@ import (
 )
 
 // logger returns a simple logger that wraps a http.handler and logs any incoming request
-func logger(inner appJSONHandler, name string) http.Handler {
+func logger(inner http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
