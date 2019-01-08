@@ -91,7 +91,8 @@ var cmdDBServe = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "error creating storage")
 		}
-		r, err := router.New(store)
+		log := log.New(os.Stderr, "", log.LstdFlags)
+		r, err := router.New(store, log)
 		if err != nil {
 			return errors.Wrap(err, "error creating new server")
 		}
