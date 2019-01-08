@@ -7,8 +7,10 @@ import (
 	"gopkg.in/square/go-jose.v2/jwt"
 )
 
-// AuthoriseClaims extracts the claims from a given JWT and authorises a request against the claims.
-// If the claims are authorised, the next http.Handler will be called, otherwise an Unauthorised status code will be written to the response.
+// AuthoriseClaims extracts the claims from a given JWT and authorises a
+// request against the claims.
+// If the claims are authorised, the next http.Handler will be called,
+// otherwise an Unauthorised status code will be written to the response.
 // It is the responsibility of the caller to provide non-nil values
 func AuthoriseClaims(logger *log.Logger, ce ClaimsExtractor, ca ClaimsAuthoriser, next http.Handler) TokenHandlerFunc {
 	return func(token *jwt.JSONWebToken, w http.ResponseWriter, r *http.Request) {
