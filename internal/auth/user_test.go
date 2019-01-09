@@ -9,7 +9,7 @@ import (
 )
 
 func TestUserClaimsAuthoriser_NewClaims(t *testing.T) {
-	a := auth.NewUserClaimsAuthoriser(model.User{})
+	a := auth.UserClaimsAuthoriser(model.User{})
 	claims := a.NewClaims()
 	assert.NotNil(t, claims)
 	assert.Equal(t, model.User{}, *claims.(*model.User))
@@ -41,14 +41,14 @@ func TestUserClaimsAuthoriser(t *testing.T) {
 		},
 	} {
 		t.Run("unauthorised/"+errorCase.name, func(t *testing.T) {
-			a := auth.NewUserClaimsAuthoriser(errorCase.authorised)
+			a := auth.UserClaimsAuthoriser(errorCase.authorised)
 			err := a.Authorise(errorCase.claims)
 			assert.Error(t, err)
 		})
 	}
 
 	t.Run("authorised", func(t *testing.T) {
-		a := auth.NewUserClaimsAuthoriser(model.User{})
+		a := auth.UserClaimsAuthoriser(model.User{})
 		err := a.Authorise(&model.User{})
 		assert.NoError(t, err)
 	})
