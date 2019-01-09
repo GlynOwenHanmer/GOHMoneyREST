@@ -8,7 +8,8 @@ import (
 	"github.com/glynternet/mon/internal/model"
 )
 
-func NewUserClaimsAuthoriser(u model.User) jwt.ClaimsAuthoriser {
+// UserClaimsAuthoriser authorises the claims of a JWT against the given user.
+func UserClaimsAuthoriser(u model.User) jwt.ClaimsAuthoriser {
 	return userClaimsAuthoriser{authorisedUser: u}
 }
 
@@ -16,10 +17,14 @@ type userClaimsAuthoriser struct {
 	authorisedUser model.User
 }
 
+// NewClaims provides an empty &model.User{} that the claims should me
+// unmarshalled into.
 func (userClaimsAuthoriser) NewClaims() interface{} {
 	return &model.User{}
 }
 
+// Authorise returns an error if the given claims cannot be authorised against
+// the Authoriser's authrosied user.
 func (a userClaimsAuthoriser) Authorise(claims interface{}) error {
 	u, ok := claims.(*model.User)
 	if !ok {
