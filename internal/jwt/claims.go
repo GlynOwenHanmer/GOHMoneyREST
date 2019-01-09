@@ -1,39 +1,29 @@
 package jwt
 
 import (
-	"log"
 	"net/http"
 
+	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2/jwt"
 )
 
 // AuthoriseClaims extracts the claims from a given JWT and authorises a
-// request against the claims.
-// If the claims are authorised, the next http.Handler will be called,
-// otherwise an Unauthorised status code will be written to the response.
-// It is the responsibility of the caller to provide non-nil values
-func AuthoriseClaims(logger *log.Logger, ce ClaimsExtractor, ca ClaimsAuthoriser, next http.Handler) TokenHandlerFunc {
-	return func(token *jwt.JSONWebToken, w http.ResponseWriter, r *http.Request) {
+// request against the claims, returning an error for any unauthorised
+// requests.
+func AuthoriseClaims(ce ClaimsExtractor, ca ClaimsAuthoriser) func(token *jwt.JSONWebToken, r *http.Request) error {
+	return func(token *jwt.JSONWebToken, r *http.Request) error {
 		claims := ca.NewClaims()
 		err := ce.Claims(r, token, claims)
 		if err != nil {
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			if logger != nil {
-				logger.Printf("Unable to extract claims: %+v", err)
-			}
-			return
+			return errors.Wrap(err, "Unable to extract claims")
 		}
 
 		err = ca.Authorise(claims)
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			if logger != nil {
-				logger.Printf("Unauthorised token: %+v", err)
-			}
-			return
+			return errors.Wrap(err, "Unauthorised token")
 		}
 
-		next.ServeHTTP(w, r)
+		return nil
 	}
 }
 
