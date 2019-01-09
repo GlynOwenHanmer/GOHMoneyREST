@@ -24,7 +24,9 @@ func (userClaimsAuthoriser) NewClaims() interface{} {
 }
 
 // Authorise returns an error if the given claims cannot be authorised against
-// the Authoriser's authrosied user.
+// the Authoriser's authorised user.
+// If the authorised user's email is verified, Authorise expects the claims' #
+// user to have a verified email address.
 func (a userClaimsAuthoriser) Authorise(claims interface{}) error {
 	u, ok := claims.(*model.User)
 	if !ok {
