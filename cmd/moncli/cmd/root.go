@@ -14,7 +14,8 @@ import (
 const (
 	appName = "moncli"
 
-	keyServerHost = "server-host"
+	keyServerHost    = "server-host"
+	keyAuthTokenFile = "auth-token-file"
 )
 
 var rootCmd = &cobra.Command{
@@ -32,6 +33,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringP(keyServerHost, "H", "", "server host")
+	rootCmd.PersistentFlags().String(keyAuthTokenFile, "", "file containing authorisation token")
 	err := viper.BindPFlags(rootCmd.PersistentFlags())
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "binding root command flags"))
