@@ -13,17 +13,24 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Client is a client to retrieve accounting items over http using REST
-type Client string
+// Client communicates with the server
+type Client struct {
+	url string
+}
 
-// newClient provides the client that should be used to make any calls against
+// New creates a new Client configured to communicate with the server at the given url.
+func New(url string) Client {
+	return Client{url: url}
+}
+
+// newClient provides the Client that should be used to make any calls against
 // the mon server
 func newClient() *http.Client {
 	return &http.Client{Timeout: 5 * time.Second}
 }
 
 func (c Client) getFromEndpoint(endpoint string) (*http.Response, error) {
-	url := string(c) + endpoint
+	url := string(c.url) + endpoint
 	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
@@ -32,7 +39,7 @@ func (c Client) getFromEndpoint(endpoint string) (*http.Response, error) {
 }
 
 func (c Client) postToEndpoint(endpoint string, contentType string, body io.Reader) (*http.Response, error) {
-	url := string(c) + endpoint
+	url := string(c.url) + endpoint
 	r, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
@@ -42,7 +49,7 @@ func (c Client) postToEndpoint(endpoint string, contentType string, body io.Read
 }
 
 func (c Client) deleteToEndpoint(endpoint string) (*http.Response, error) {
-	url := string(c) + endpoint
+	url := string(c.url) + endpoint
 	r, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
@@ -57,7 +64,7 @@ func (c Client) Available() bool {
 	return err == nil
 }
 
-// Close is a noop closer as there is not behaviour required to close this client
+// Close is a noop closer as there is not behaviour required to close this Client
 func (c Client) Close() error {
 	return nil
 }

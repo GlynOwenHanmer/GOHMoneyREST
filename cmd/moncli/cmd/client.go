@@ -6,5 +6,5 @@ import (
 )
 
 func newClient() client.Client {
-	return client.Client(viper.GetString(keyServerHost))
+	return client.New(viper.GetString(keyServerHost))
 }

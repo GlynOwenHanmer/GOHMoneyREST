@@ -48,7 +48,7 @@ var accountsCmd = &cobra.Command{
 			atDate.Time = &now
 		}
 
-		c := client.Client(viper.GetString(keyServerHost))
+		c := client.New(viper.GetString(keyServerHost))
 		as, err := accounts(c)
 		if err != nil {
 			return errors.Wrap(err, "getting accounts")
@@ -75,7 +75,7 @@ var accountsBalancesCmd = &cobra.Command{
 			atDate.Time = &now
 		}
 
-		c := client.Client(viper.GetString(keyServerHost))
+		c := client.New(viper.GetString(keyServerHost))
 		as, err := accounts(c)
 		if err != nil {
 			return errors.Wrap(err, "getting accounts")
