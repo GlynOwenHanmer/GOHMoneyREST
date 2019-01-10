@@ -23,17 +23,29 @@ func newClient() *http.Client {
 }
 
 func (c Client) getFromEndpoint(endpoint string) (*http.Response, error) {
-	return http.Get(string(c) + endpoint)
+	url := string(c) + endpoint
+	r, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
+	}
+	return newClient().Do(r)
 }
 
 func (c Client) postToEndpoint(endpoint string, contentType string, body io.Reader) (*http.Response, error) {
-	return http.Post(string(c)+endpoint, contentType, body)
+	url := string(c) + endpoint
+	r, err := http.NewRequest(http.MethodPost, url, body)
+	if err != nil {
+		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
+	}
+	r.Header.Set("Content-Type", contentType)
+	return newClient().Do(r)
 }
 
 func (c Client) deleteToEndpoint(endpoint string) (*http.Response, error) {
-	r, err := http.NewRequest(http.MethodDelete, string(c)+endpoint, nil)
+	url := string(c) + endpoint
+	r, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "creating new request")
+		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
 	}
 	return newClient().Do(r)
 }
