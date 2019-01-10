@@ -13,14 +13,30 @@ import (
 	"github.com/pkg/errors"
 )
 
-// New creates a new Client configured to communicate with the server at the given url.
-func New(url string) Client {
-	return Client{url: url}
+// New creates a new Client configured to communicate with the server at the
+// given url, with the given Options.
+func New(url string, options ...Option) Client {
+	c := Client{url: url}
+	for _, o := range options {
+		o(&c)
+	}
+	return c
 }
 
 // Client communicates with the server
 type Client struct {
-	url string
+	url   string
+	token string
+}
+
+// Option applies optional logic or functionality to a Client
+type Option func(*Client)
+
+// WithAuthToken sets the token of a client
+func WithAuthToken(token string) Option {
+	return func(client *Client) {
+		client.token = token
+	}
 }
 
 // newClient provides the Client that should be used to make any calls against
@@ -33,6 +49,9 @@ func newClient() *http.Client {
 func (c Client) newRequest(method, endpoint string, body io.Reader) (*http.Request, error) {
 	url := c.url + endpoint
 	r, err := http.NewRequest(method, url, body)
+	if c.token != "" {
+		r.Header.Set("Authorization", "BEARER "+c.token)
+	}
 	return r, errors.Wrapf(err, "creating request for url:%q", url)
 }
 
