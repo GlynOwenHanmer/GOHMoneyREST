@@ -30,7 +30,7 @@ func newClient() *http.Client {
 }
 
 func (c Client) getFromEndpoint(endpoint string) (*http.Response, error) {
-	url := string(c.url) + endpoint
+	url := c.url + endpoint
 	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
@@ -39,7 +39,7 @@ func (c Client) getFromEndpoint(endpoint string) (*http.Response, error) {
 }
 
 func (c Client) postToEndpoint(endpoint string, contentType string, body io.Reader) (*http.Response, error) {
-	url := string(c.url) + endpoint
+	url := c.url + endpoint
 	r, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
@@ -49,7 +49,7 @@ func (c Client) postToEndpoint(endpoint string, contentType string, body io.Read
 }
 
 func (c Client) deleteToEndpoint(endpoint string) (*http.Response, error) {
-	url := string(c.url) + endpoint
+	url := c.url + endpoint
 	r, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
