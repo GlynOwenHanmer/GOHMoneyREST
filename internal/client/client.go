@@ -29,30 +29,34 @@ func newClient() *http.Client {
 	return &http.Client{Timeout: 5 * time.Second}
 }
 
-func (c Client) getFromEndpoint(endpoint string) (*http.Response, error) {
+// newRequest creates a new *http.Request configured for the server url and given endpoint
+func (c Client) newRequest(method, endpoint string, body io.Reader) (*http.Request, error) {
 	url := c.url + endpoint
-	r, err := http.NewRequest(http.MethodGet, url, nil)
+	r, err := http.NewRequest(method, url, body)
+	return r, errors.Wrapf(err, "creating request for url:%q", url)
+}
+
+func (c Client) getFromEndpoint(endpoint string) (*http.Response, error) {
+	r, err := c.newRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
+		return nil, errors.Wrapf(err, "creating request for endpoint:%q", endpoint)
 	}
 	return newClient().Do(r)
 }
 
 func (c Client) postToEndpoint(endpoint string, contentType string, body io.Reader) (*http.Response, error) {
-	url := c.url + endpoint
-	r, err := http.NewRequest(http.MethodPost, url, body)
+	r, err := c.newRequest(http.MethodPost, endpoint, body)
 	if err != nil {
-		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
+		return nil, errors.Wrapf(err, "creating request for endpoint:%q", endpoint)
 	}
 	r.Header.Set("Content-Type", contentType)
 	return newClient().Do(r)
 }
 
 func (c Client) deleteToEndpoint(endpoint string) (*http.Response, error) {
-	url := c.url + endpoint
-	r, err := http.NewRequest(http.MethodDelete, url, nil)
+	r, err := c.newRequest(http.MethodDelete, endpoint, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "creating new request for url:%q", url)
+		return nil, errors.Wrapf(err, "creating request for endpoint:%q", endpoint)
 	}
 	return newClient().Do(r)
 }
