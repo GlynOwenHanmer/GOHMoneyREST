@@ -11,7 +11,6 @@ import (
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/go-money/currency"
 	"github.com/glynternet/mon/internal/accountbalance"
-	"github.com/glynternet/mon/internal/client"
 	"github.com/glynternet/mon/internal/sort"
 	"github.com/glynternet/mon/pkg/date"
 	"github.com/glynternet/mon/pkg/filter"
@@ -48,7 +47,10 @@ var accountsCmd = &cobra.Command{
 			atDate.Time = &now
 		}
 
-		c := client.New(viper.GetString(keyServerHost))
+		c, err := newClient()
+		if err != nil {
+			return errors.WithMessage(err, "creating new client")
+		}
 		as, err := accounts(c)
 		if err != nil {
 			return errors.Wrap(err, "getting accounts")
@@ -75,7 +77,10 @@ var accountsBalancesCmd = &cobra.Command{
 			atDate.Time = &now
 		}
 
-		c := client.New(viper.GetString(keyServerHost))
+		c, err := newClient()
+		if err != nil {
+			return errors.WithMessage(err, "creating new client")
+		}
 		as, err := accounts(c)
 		if err != nil {
 			return errors.Wrap(err, "getting accounts")

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/glynternet/mon/internal/auth/auth0"
 	"github.com/glynternet/mon/internal/router"
 	"github.com/glynternet/mon/internal/versioncmd"
 	"github.com/glynternet/mon/pkg/storage"
@@ -20,14 +21,16 @@ const (
 	appName = "monserve"
 
 	// viper keys
-	keyPort           = "port"
-	keySSLCertificate = "ssl-certificate"
-	keySSLKey         = "ssl-key"
-	keyDBHost         = "db-host"
-	keyDBUser         = "db-user"
-	keyDBPassword     = "db-password"
-	keyDBName         = "db-name"
-	keyDBSSLMode      = "db-sslmode"
+	keyPort            = "port"
+	keySSLCertificate  = "ssl-certificate"
+	keySSLKey          = "ssl-key"
+	keyAuth0Domain     = "auth0-domain"
+	keyAuthorisedEmail = "authorised-email"
+	keyDBHost          = "db-host"
+	keyDBUser          = "db-user"
+	keyDBPassword      = "db-password"
+	keyDBName          = "db-name"
+	keyDBSSLMode       = "db-sslmode"
 )
 
 // to be changed using ldflags with the go build command
@@ -49,9 +52,25 @@ func main() {
 			if err != nil {
 				return errors.Wrap(err, "error creating storage")
 			}
-			r, err := router.New(store, logger)
+			var handler http.Handler
+			handler, err = router.New(store, logger)
 			if err != nil {
 				return errors.Wrap(err, "error creating new server")
+			}
+
+			auth0Domain := viper.GetString(keyAuth0Domain)
+			if auth0Domain == "" {
+				logger.Print("NO AUTH0 DOMAIN GIVEN.\nNO AUTHORISATION WILL BE USED!")
+			} else {
+				handler, err = withAuth(
+					logger,
+					auth0Domain,
+					viper.GetString(keyAuthorisedEmail),
+					handler,
+				)
+				if err != nil {
+					return errors.Wrap(err, "setting up auth")
+				}
 			}
 
 			serveFn := newServeFn(
@@ -61,7 +80,7 @@ func main() {
 			)
 			addr := ":" + viper.GetString(keyPort)
 			logger.Printf("Serving at %s", addr)
-			return serveFn(addr, r)
+			return serveFn(addr, handler)
 		},
 	}
 
@@ -71,6 +90,14 @@ func main() {
 	cmdDBServe.Flags().String(keyPort, "80", "server listening port")
 	cmdDBServe.Flags().String(keySSLCertificate, "", "path to SSL certificate, leave empty for http")
 	cmdDBServe.Flags().String(keySSLKey, "", "path to SSL key, leave empty for https")
+	cmdDBServe.Flags().String(keyAuth0Domain, "",
+		"auth0 domain to use for authentication. If left empty, no authorisation will be set",
+	)
+	cmdDBServe.Flags().String(keyAuthorisedEmail, "",
+		fmt.Sprintf(
+			"email address of authorised user. Must be set if %s is set. Will have no effect if %s is not set",
+			keyAuth0Domain, keyAuth0Domain),
+	)
 	cmdDBServe.Flags().String(keyDBHost, "", "host address of the DB backend")
 	cmdDBServe.Flags().String(keyDBName, "", "name of the DB set to use")
 	cmdDBServe.Flags().String(keyDBUser, "", "DB user to authenticate with")
@@ -86,6 +113,16 @@ func main() {
 		logger.Println(err)
 		os.Exit(1)
 	}
+}
+
+// withAuth wraps the given handler in an authorisation handler, returning the wrapped handler
+func withAuth(logger *log.Logger, auth0Domain, email string, handler http.Handler) (http.Handler, error) {
+	authoriser, err := auth0.UserEmailAuthoriser(auth0Domain, email)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating authorisation middleware")
+	}
+	logger.Printf("Auth0 domain: %s", auth0Domain)
+	return router.WithAuthoriser(logger, authoriser, handler), nil
 }
 
 func viperAutoEnvVar() {

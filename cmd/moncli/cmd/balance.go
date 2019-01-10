@@ -22,7 +22,11 @@ var balanceDeleteCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "parsing balance ID")
 		}
-		return newClient().DeleteBalance(uint(id))
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
+		return c.DeleteBalance(uint(id))
 	},
 }
 
