@@ -80,3 +80,34 @@ func newJSONTestServer(encode interface{}, code int) *httptest.Server {
 		}
 	}))
 }
+
+func TestWithAuthToken(t *testing.T) {
+	o := WithAuthToken("")
+	c := Client{}
+	o(&c)
+	assert.Equal(t, "", c.token)
+
+	o = WithAuthToken("woop")
+	c = Client{}
+	o(&c)
+	assert.Equal(t, "woop", c.token)
+}
+
+func TestNew(t *testing.T) {
+	t.Run("no options", func(t *testing.T) {
+		c := New("any")
+		want := Client{url: "any"}
+		assert.Equal(t, want, c)
+	})
+
+	t.Run("multiple options", func(t *testing.T) {
+		var calls int
+		option := func(*Client) {
+			calls++
+		}
+		c := New("any", option, option)
+		want := Client{url: "any"}
+		assert.Equal(t, want, c)
+		assert.Equal(t, 2, calls)
+	})
+}
