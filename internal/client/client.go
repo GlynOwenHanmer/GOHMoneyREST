@@ -49,6 +49,9 @@ func newClient() *http.Client {
 func (c Client) newRequest(method, endpoint string, body io.Reader) (*http.Request, error) {
 	url := c.url + endpoint
 	r, err := http.NewRequest(method, url, body)
+	if c.token != "" {
+		r.Header.Set("Authorization", "BEARER "+c.token)
+	}
 	return r, errors.Wrapf(err, "creating request for url:%q", url)
 }
 

@@ -81,6 +81,24 @@ func newJSONTestServer(encode interface{}, code int) *httptest.Server {
 	}))
 }
 
+func TestClient_newRequest(t *testing.T) {
+	t.Run("no token", func(t *testing.T) {
+		c := New("anyurl")
+		r, err := c.newRequest("", "", nil)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.Empty(t, r.Header.Get("Authorization"))
+	})
+
+	t.Run("with token", func(t *testing.T) {
+		c := New("anyurl", WithAuthToken("woop"))
+		r, err := c.newRequest("", "", nil)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.Equal(t, "BEARER woop", r.Header.Get("Authorization"))
+	})
+}
+
 func TestWithAuthToken(t *testing.T) {
 	o := WithAuthToken("")
 	c := Client{}
