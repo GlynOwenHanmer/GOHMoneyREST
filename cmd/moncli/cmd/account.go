@@ -48,7 +48,11 @@ var accountCmd = &cobra.Command{
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		a, err := newClient().SelectAccount(uint(id))
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
+		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account")
 		}
@@ -88,7 +92,12 @@ var accountAddCmd = &cobra.Command{
 			return errors.Wrap(err, "creating new account for insert")
 		}
 
-		i, err := newClient().InsertAccount(*a)
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
+
+		i, err := c.InsertAccount(*a)
 		if err != nil {
 			return errors.Wrap(err, "inserting new account")
 		}
@@ -117,8 +126,10 @@ var accountOpenCmd = &cobra.Command{
 			return errors.Wrap(err, "creating new account for insert")
 		}
 
-		c := newClient()
-
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		i, err := c.InsertAccount(*a)
 		if err != nil {
 			return errors.Wrap(err, "inserting new account")
@@ -153,8 +164,10 @@ var accountReopenCmd = &cobra.Command{
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		c := newClient()
-
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account")
@@ -187,8 +200,10 @@ var accountDeleteCmd = &cobra.Command{
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		c := newClient()
-
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account")
@@ -220,8 +235,10 @@ var accountCloseCmd = &cobra.Command{
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		c := newClient()
-
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account")
@@ -273,7 +290,10 @@ the same as the original account`,
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		c := newClient()
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account to update")
@@ -323,7 +343,10 @@ var accountRenameCmd = &cobra.Command{
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		c := newClient()
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account")
@@ -367,7 +390,10 @@ var accountBalancesCmd = &cobra.Command{
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		c := newClient()
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account")
@@ -403,7 +429,10 @@ var accountBalanceInsertCmd = &cobra.Command{
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		c := newClient()
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account")
@@ -441,7 +470,10 @@ var accountBalanceCmd = &cobra.Command{
 			return errors.Wrap(err, "parsing account id")
 		}
 
-		c := newClient()
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		a, err := c.SelectAccount(uint(id))
 		if err != nil {
 			return errors.Wrap(err, "selecting account")
