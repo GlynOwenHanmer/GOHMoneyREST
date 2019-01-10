@@ -13,14 +13,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Client communicates with the server
-type Client struct {
-	url string
-}
-
 // New creates a new Client configured to communicate with the server at the given url.
 func New(url string) Client {
 	return Client{url: url}
+}
+
+// Client communicates with the server
+type Client struct {
+	url string
 }
 
 // newClient provides the Client that should be used to make any calls against
