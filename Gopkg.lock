@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/auth0-community/go-auth0"
+  packages = ["."]
+  revision = "ddfdc88aaa5909a3d4e3ad0543a27f4a63a691e6"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -178,6 +184,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8a8ef0ee834ae2236d5fe6ba242ed7a06b5ee7c70c6b9eacb7a3130f56e2abf3"
+  inputs-digest = "8a974c98aed1b6bfccec91d97e204e9d6bbb707709df437dc2f0954417be9bb9"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -10,7 +10,7 @@ import (
 // AuthoriseClaims extracts the claims from a given JWT and authorises a
 // request against the claims, returning an error for any unauthorised
 // requests.
-func AuthoriseClaims(ce ClaimsExtractor, ca ClaimsAuthoriser) func(token *jwt.JSONWebToken, r *http.Request) error {
+func AuthoriseClaims(ce ClaimsExtractor, ca ClaimsAuthoriser) TokenAuthoriserFunc {
 	return func(token *jwt.JSONWebToken, r *http.Request) error {
 		claims := ca.NewClaims()
 		err := ce.Claims(r, token, claims)
