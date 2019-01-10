@@ -226,5 +226,5 @@ func newTestNetListener(t *testing.T) net.Listener {
 }
 
 func newTestClient(l net.Listener) Client {
-	return Client("http://" + l.Addr().String())
+	return Client{url: "http://" + l.Addr().String()}
 }
