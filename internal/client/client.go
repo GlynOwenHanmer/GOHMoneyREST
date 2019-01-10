@@ -13,27 +13,50 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Client is a client to retrieve accounting items over http using REST
-type Client string
+// New creates a new Client configured to communicate with the server at the given url.
+func New(url string) Client {
+	return Client{url: url}
+}
 
-// newClient provides the client that should be used to make any calls against
+// Client communicates with the server
+type Client struct {
+	url string
+}
+
+// newClient provides the Client that should be used to make any calls against
 // the mon server
 func newClient() *http.Client {
 	return &http.Client{Timeout: 5 * time.Second}
 }
 
+// newRequest creates a new *http.Request configured for the server url and given endpoint
+func (c Client) newRequest(method, endpoint string, body io.Reader) (*http.Request, error) {
+	url := c.url + endpoint
+	r, err := http.NewRequest(method, url, body)
+	return r, errors.Wrapf(err, "creating request for url:%q", url)
+}
+
 func (c Client) getFromEndpoint(endpoint string) (*http.Response, error) {
-	return http.Get(string(c) + endpoint)
+	r, err := c.newRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "creating request for endpoint:%q", endpoint)
+	}
+	return newClient().Do(r)
 }
 
 func (c Client) postToEndpoint(endpoint string, contentType string, body io.Reader) (*http.Response, error) {
-	return http.Post(string(c)+endpoint, contentType, body)
+	r, err := c.newRequest(http.MethodPost, endpoint, body)
+	if err != nil {
+		return nil, errors.Wrapf(err, "creating request for endpoint:%q", endpoint)
+	}
+	r.Header.Set("Content-Type", contentType)
+	return newClient().Do(r)
 }
 
 func (c Client) deleteToEndpoint(endpoint string) (*http.Response, error) {
-	r, err := http.NewRequest(http.MethodDelete, string(c)+endpoint, nil)
+	r, err := c.newRequest(http.MethodDelete, endpoint, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "creating new request")
+		return nil, errors.Wrapf(err, "creating request for endpoint:%q", endpoint)
 	}
 	return newClient().Do(r)
 }
@@ -45,7 +68,7 @@ func (c Client) Available() bool {
 	return err == nil
 }
 
-// Close is a noop closer as there is not behaviour required to close this client
+// Close is a noop closer as there is not behaviour required to close this Client
 func (c Client) Close() error {
 	return nil
 }

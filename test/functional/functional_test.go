@@ -53,7 +53,7 @@ func TestMain(m *testing.M) {
 
 func TestSuite(t *testing.T) {
 	host := os.Getenv(keyServerHost)
-	store := client.Client(host)
+	store := client.New(host)
 	if !store.Available() {
 		t.Fatalf("store at %q is unavailable", host)
 	}

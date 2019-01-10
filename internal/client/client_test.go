@@ -13,11 +13,11 @@ import (
 )
 
 // ensure that a Client can be used as a storage.Storage
-var _ storage.Storage = Client("")
+var _ storage.Storage = Client{url: ""}
 
 func Test_getBodyFromEndpoint(t *testing.T) {
 	t.Run("get error", func(t *testing.T) {
-		c := Client("bloopybloop")
+		c := Client{url: "bloopybloop"}
 		bod, err := c.getBodyFromEndpoint("")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "getting from endpoint")
@@ -27,7 +27,7 @@ func Test_getBodyFromEndpoint(t *testing.T) {
 	t.Run("unexpected status", func(t *testing.T) {
 		srv := newJSONTestServer(nil, http.StatusTeapot)
 		defer srv.Close()
-		c := Client(srv.URL)
+		c := Client{url: srv.URL}
 		as, err := c.getBodyFromEndpoint("")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "server returned unexpected code")
@@ -45,7 +45,7 @@ func (m stubMarshal) MarshalJSON() ([]byte, error) {
 
 func Test_postAsJSONToEndpoint(t *testing.T) {
 	t.Run("marshal error", func(t *testing.T) {
-		c := Client("bloopybloop")
+		c := Client{url: "bloopybloop"}
 		obj := stubMarshal{
 			err: errors.New("can't unmarshal me"),
 		}
@@ -57,7 +57,7 @@ func Test_postAsJSONToEndpoint(t *testing.T) {
 	})
 
 	t.Run("post to endpoint error", func(t *testing.T) {
-		c := Client("bloopybleep")
+		c := Client{url: "bloopybleep"}
 		res, err := c.postAsJSONToEndpoint("", nil)
 		if assert.Error(t, err) {
 			assert.Contains(t, err.Error(), "posting to endpoint")

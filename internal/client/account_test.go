@@ -13,7 +13,7 @@ import (
 
 func TestGetAccountsFromEndpoint(t *testing.T) {
 	t.Run("get body error", func(t *testing.T) {
-		c := Client("bloopybloop")
+		c := Client{url: "bloopybloop"}
 		as, err := c.getAccountsFromEndpoint("")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "getting from endpoint")
@@ -26,7 +26,7 @@ func TestGetAccountsFromEndpoint(t *testing.T) {
 			http.StatusOK,
 		)
 		defer srv.Close()
-		c := Client(srv.URL)
+		c := Client{url: srv.URL}
 		as, err := c.getAccountsFromEndpoint("")
 		if assert.Error(t, err) {
 			assert.IsType(t, &json.UnmarshalTypeError{}, errors.Cause(err))
@@ -37,7 +37,7 @@ func TestGetAccountsFromEndpoint(t *testing.T) {
 
 func TestGetAccountFromEndpoint(t *testing.T) {
 	t.Run("get body error", func(t *testing.T) {
-		c := Client("bloopybleep")
+		c := Client{url: "bloopybleep"}
 		a, err := c.getAccountFromEndpoint("")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "getting from endpoint")
@@ -50,7 +50,7 @@ func TestGetAccountFromEndpoint(t *testing.T) {
 			http.StatusOK,
 		)
 		defer srv.Close()
-		c := Client(srv.URL)
+		c := Client{url: srv.URL}
 		as, err := c.getAccountFromEndpoint("")
 		if assert.Error(t, err) {
 			assert.Contains(t, err.Error(), "json unmarshalling into account")
@@ -74,7 +74,7 @@ func TestPostAccountToEndpoint(t *testing.T) {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		}))
-		bod, err := Client(srv.URL).postAccountToEndpoint("", account.Account{})
+		bod, err := Client{url: srv.URL}.postAccountToEndpoint("", account.Account{})
 		if assert.Error(t, err) {
 			assert.Contains(t, err.Error(), "server returned unexpected code ")
 		}

@@ -11,7 +11,7 @@ import (
 
 func TestGetBalancesFromEndpoint(t *testing.T) {
 	t.Run("get body error", func(t *testing.T) {
-		c := Client("bloopybloop")
+		c := Client{url: "bloopybloop"}
 		as, err := c.getBalancesFromEndpoint("")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "getting from endpoint")
@@ -24,7 +24,7 @@ func TestGetBalancesFromEndpoint(t *testing.T) {
 			http.StatusOK,
 		)
 		defer srv.Close()
-		c := Client(srv.URL)
+		c := Client{url: srv.URL}
 		bs, err := c.getBalancesFromEndpoint("")
 		if assert.Error(t, err) {
 			assert.IsType(t, &json.UnmarshalTypeError{}, errors.Cause(err))
