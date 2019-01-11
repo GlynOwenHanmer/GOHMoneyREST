@@ -51,6 +51,7 @@ func (ah appJSONHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(status)
 	w.Header().Set(`Content-Type`, `application/json; charset=UTF-8`)
 	_, wErr := w.Write(bs)
 	if wErr != nil {
