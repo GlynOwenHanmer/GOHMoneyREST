@@ -23,18 +23,7 @@ func (ah appJSONHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			"error serving on appJSONHandler %v. Error: %v - Status: %d (%s) - Request: %+v",
 			ah, err, status, http.StatusText(status), r,
 		)
-		switch status {
-		case http.StatusServiceUnavailable:
-			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
-			// We can have cases as granular as we like, if we wanted to
-			// return custom errors for specific status codes.
-			// TODO: if http.StatusInternalServerError is received, we should return bad request and log the error maybe?
-		case http.StatusInternalServerError:
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		default:
-			// Catch any other errors we haven't explicitly handled
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
+		writeError(w, status, err)
 		return
 	}
 
@@ -55,5 +44,21 @@ func (ah appJSONHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, wErr := w.Write(bs)
 	if wErr != nil {
 		log.Print(errors.Wrap(wErr, "writing body to ResponseWriter"))
+	}
+}
+
+func writeError(w http.ResponseWriter, code int, err error) {
+	switch code {
+	case http.StatusServiceUnavailable:
+		http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
+		// We can have cases as granular as we like, if we wanted to
+		// return custom errors for specific code codes.
+		// TODO: if http.StatusInternalServerError is received, we should return bad request and log the error maybe?
+	case http.StatusInternalServerError:
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	default:
+		// Catch any other errors we haven't explicitly handled
+		log.Printf("Unhandled error code: %d, from error: %+v", code, err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
