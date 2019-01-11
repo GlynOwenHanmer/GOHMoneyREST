@@ -9,18 +9,23 @@ import (
 	"github.com/pkg/errors"
 )
 
-type appJSONHandler func(*http.Request) (int, interface{}, error)
+// AppJSONHandler handles a request and returns a status code, something that
+// should be marshalled into the response body and any errors that occur in the
+// process
+type AppJSONHandler func(*http.Request) (int, interface{}, error)
 
-// ServeHTTP makes our appJSONHandler function satisfy the http.HandlerFunc interface
-// We won't have written to our ResponseWriter within the appJSONHandler, so we
-// marshal our appJSONHandler's interface{} return value into some bytes as JSON
-func (ah appJSONHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// ServeHTTP ensures that an AppJSONHandler satisfies the http.Handler
+// interface.
+// The ResponseWriter should not have been written to when when the
+// AppJSONHandler was called, so we marshal our AppJSONHandler's interface{}
+// return value into some bytes as JSON
+func (ah AppJSONHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	status, bod, err := ah(r)
 
 	// handle errors
 	if err != nil {
 		log.Printf(
-			"error serving on appJSONHandler %v. Error: %v - Status: %d (%s) - Request: %+v",
+			"error serving on AppJSONHandler %v. Error: %v - Status: %d (%s) - Request: %+v",
 			ah, err, status, http.StatusText(status), r,
 		)
 		writeError(w, status, err)
