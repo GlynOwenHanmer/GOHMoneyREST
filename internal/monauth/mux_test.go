@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/glynternet/mon/internal/monauth"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,7 @@ func TestServeMux(t *testing.T) {
 			map[string]interface{}{"id_token": "woooooh"},
 		),
 	}
-	m := monauth.ServeMux(exchanger)
+	m := monauth.ServeMux(exchanger, time.Second)
 	assert.NotNil(t, m)
 
 	r := httptest.NewRequest(http.MethodGet, "any://any/loginurl", nil)
