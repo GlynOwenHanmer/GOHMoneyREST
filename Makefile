@@ -11,7 +11,9 @@ GOBUILD_CMD ?= $(GOBUILD_ENVVARS) go build $(GOBUILD_FLAGS)
 OS ?= linux
 ARCH ?= amd64
 
-build: moncli monserve
+BINARIES ?= monauth moncli monserve
+
+build: $(BINARIES)
 
 clean:
 	rm $(BUILD_DIR)/*
