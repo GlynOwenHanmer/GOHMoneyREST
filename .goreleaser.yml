@@ -18,7 +18,7 @@ builds:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "SNAPSHOT-{{ .Tag }}-{{ .Commit }}"
+  name_template: "SNAPSHOT-{{ .Version }}-{{ .Commit }}"
 changelog:
   sort: asc
 
@@ -26,8 +26,8 @@ dockers:
 - binary: moncli
   dockerfile: bin/Dockerfile.moncli
   image_templates:
-  - 'glynhanmer/{{.Binary}}:{{ .Tag }}'
+  - 'glynhanmer/{{.Binary}}:{{ .Version }}'
 - binary: monserve
   dockerfile: bin/Dockerfile.monserve
   image_templates:
-  - 'glynhanmer/{{.Binary}}:{{ .Tag }}'
+  - 'glynhanmer/{{.Binary}}:{{ .Version }}'
