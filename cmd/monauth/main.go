@@ -24,7 +24,7 @@ const (
 	keySSLCertificate    = "ssl-certificate"
 	keySSLKey            = "ssl-key"
 	keyAuth0Domain       = "auth0-domain"
-	keyAuth0ClientId     = "auth0-client-id"
+	keyAuth0ClientID     = "auth0-client-id"
 	keyAuth0ClientSecret = "auth0-client-secret"
 	keyAuth0CallbackURL  = "auth0-callback-url"
 )
@@ -40,7 +40,7 @@ func main() {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			for _, varKey := range []string{
 				keyAuth0Domain,
-				keyAuth0ClientId,
+				keyAuth0ClientID,
 				keyAuth0ClientSecret,
 				keyAuth0CallbackURL,
 			} {
@@ -52,7 +52,7 @@ func main() {
 
 			domain := viper.GetString(keyAuth0Domain)
 			codeExchanger := &oauth2.Config{
-				ClientID:     viper.GetString(keyAuth0ClientId),
+				ClientID:     viper.GetString(keyAuth0ClientID),
 				ClientSecret: viper.GetString(keyAuth0ClientSecret),
 				RedirectURL:  viper.GetString(keyAuth0CallbackURL),
 				Scopes:       []string{"openid", "email"},
@@ -83,7 +83,7 @@ func main() {
 	cmdAuth.Flags().String(keySSLCertificate, "", "path to SSL certificate, leave empty for http")
 	cmdAuth.Flags().String(keySSLKey, "", "path to SSL key, leave empty for http")
 	cmdAuth.Flags().String(keyAuth0Domain, "", "auth0 domain to use for authentication")
-	cmdAuth.Flags().String(keyAuth0ClientId, "", "auth0 client ID")
+	cmdAuth.Flags().String(keyAuth0ClientID, "", "auth0 client ID")
 	cmdAuth.Flags().String(keyAuth0ClientSecret, "", "auth0 client secret")
 	cmdAuth.Flags().String(keyAuth0CallbackURL, "", "auth0 callback URL")
 	err := viper.BindPFlags(cmdAuth.Flags())
