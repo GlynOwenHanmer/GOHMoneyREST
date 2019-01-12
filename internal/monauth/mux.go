@@ -7,6 +7,13 @@ import (
 	"github.com/glynternet/mon/internal/router"
 )
 
+// ServeMux creates a http.ServeMux configured with two routes:
+//
+// 		/loginurl 		- To retrieve a login URL, which the user should browse
+// 						  to to login
+//		/logincallback	- The address that the oauth2 flow should be configured
+//						  to redirect to. This is the handler that exhanges the
+//						  oauth2 code for an id_token
 func ServeMux(ace AuthCodeExchanger, tokenExchangeTimout time.Duration) *http.ServeMux {
 	mux := &http.ServeMux{}
 	env := &env{
