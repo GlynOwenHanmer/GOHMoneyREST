@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/glynternet/mon/internal/middleware"
 	"github.com/glynternet/mon/internal/monauth"
 	"github.com/glynternet/mon/internal/versioncmd"
 	"github.com/spf13/cobra"
@@ -34,7 +35,7 @@ var version = "unknown"
 func main() {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
-	var cmdDBServe = &cobra.Command{
+	cmdAuth := &cobra.Command{
 		Use: appName,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			for _, varKey := range []string{
@@ -61,7 +62,9 @@ func main() {
 				},
 			}
 
-			handler := monauth.ServeMux(codeExchanger, time.Second*10)
+			mux := monauth.ServeMux(codeExchanger, time.Second*10)
+			handler := middleware.Logger(logger, mux, "")
+
 			serveFn := newServeFn(
 				logger,
 				viper.GetString(keySSLCertificate),
@@ -73,23 +76,23 @@ func main() {
 		},
 	}
 
-	cmdDBServe.AddCommand(versioncmd.New(version, os.Stdout))
+	cmdAuth.AddCommand(versioncmd.New(version, os.Stdout))
 
 	cobra.OnInitialize(viperAutoEnvVar)
-	cmdDBServe.Flags().String(keyPort, "80", "server listening port")
-	cmdDBServe.Flags().String(keySSLCertificate, "", "path to SSL certificate, leave empty for http")
-	cmdDBServe.Flags().String(keySSLKey, "", "path to SSL key, leave empty for http")
-	cmdDBServe.Flags().String(keyAuth0Domain, "", "auth0 domain to use for authentication")
-	cmdDBServe.Flags().String(keyAuth0ClientId, "", "auth0 client ID")
-	cmdDBServe.Flags().String(keyAuth0ClientSecret, "", "auth0 client secret")
-	cmdDBServe.Flags().String(keyAuth0CallbackURL, "", "auth0 callback URL")
-	err := viper.BindPFlags(cmdDBServe.Flags())
+	cmdAuth.Flags().String(keyPort, "80", "server listening port")
+	cmdAuth.Flags().String(keySSLCertificate, "", "path to SSL certificate, leave empty for http")
+	cmdAuth.Flags().String(keySSLKey, "", "path to SSL key, leave empty for http")
+	cmdAuth.Flags().String(keyAuth0Domain, "", "auth0 domain to use for authentication")
+	cmdAuth.Flags().String(keyAuth0ClientId, "", "auth0 client ID")
+	cmdAuth.Flags().String(keyAuth0ClientSecret, "", "auth0 client secret")
+	cmdAuth.Flags().String(keyAuth0CallbackURL, "", "auth0 callback URL")
+	err := viper.BindPFlags(cmdAuth.Flags())
 	if err != nil {
 		logger.Printf("unable to BindPFlags: %v", err)
 		os.Exit(1)
 	}
 
-	if err := cmdDBServe.Execute(); err != nil {
+	if err := cmdAuth.Execute(); err != nil {
 		logger.Println(err)
 		os.Exit(1)
 	}
