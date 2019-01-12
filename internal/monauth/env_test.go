@@ -12,7 +12,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// ensure that loginURLHandler is an AppJSONHandler
+// ensure that handlers are of type AppJSONHandler
 var _ router.AppJSONHandler = (&env{}).loginURLHandler
 var _ router.AppJSONHandler = (&env{}).loginCallbackHandler
 
