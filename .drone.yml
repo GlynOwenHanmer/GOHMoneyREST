@@ -44,8 +44,9 @@ pipeline:
   generate-dockerfiles:
     image: golang:1.10.4
     commands:
-      - make Dockerfile.monserve
+      - make Dockerfile.monauth
       - make Dockerfile.moncli
+      - make Dockerfile.monserve
 
   build-monserve-image:
     image: docker
