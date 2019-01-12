@@ -20,9 +20,6 @@ type env struct {
 
 // loginURLHandler generates a login URL that the user can navigate to to login
 func (e *env) loginURLHandler(_ *http.Request) (int, interface{}, error) {
-	if e.generateStateValue == nil {
-		e.generateStateValue = generateStateValue
-	}
 	state, err := e.generateStateValue()
 	if err != nil {
 		return http.StatusInternalServerError,
