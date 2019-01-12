@@ -13,13 +13,13 @@ type state struct {
 	sync.Mutex
 }
 
-func (s *state) Get() string {
+func (s *state) get() string {
 	s.Lock()
 	defer s.Unlock()
 	return s.state
 }
 
-func (s *state) Set(state string) {
+func (s *state) set(state string) {
 	s.Lock()
 	defer s.Unlock()
 	s.state = state

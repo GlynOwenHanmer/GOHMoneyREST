@@ -27,7 +27,7 @@ func (e *env) loginURLHandler(_ *http.Request) (int, interface{}, error) {
 			err
 	}
 	url := e.AuthCodeURL(state)
-	e.state.Set(state)
+	e.state.set(state)
 	return http.StatusOK, LoginURLResponse{LoginURL: url}, nil
 }
 
@@ -39,7 +39,7 @@ type LoginURLResponse struct {
 
 // loginCallbackHandler exchanges the query parameter "code" for a jwt id token.
 func (e *env) loginCallbackHandler(r *http.Request) (int, interface{}, error) {
-	expectedState := e.state.Get()
+	expectedState := e.state.get()
 	if strings.TrimSpace(expectedState) == "" {
 		return http.StatusInternalServerError,
 			http.StatusText(http.StatusInternalServerError),

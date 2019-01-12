@@ -41,7 +41,7 @@ func Test_loginURLHandler(t *testing.T) {
 			AuthCodeExchanger: exchanger,
 		}
 		code, bod, err := e.loginURLHandler(nil)
-		assert.Equal(t, "yo", e.state.Get())
+		assert.Equal(t, "yo", e.state.get())
 		assert.Nil(t, exchanger.options)
 		assert.Equal(t, LoginURLResponse{LoginURL: "hiyer"}, bod)
 		assert.NoError(t, err)
