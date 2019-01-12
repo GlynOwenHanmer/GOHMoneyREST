@@ -37,7 +37,7 @@ type LoginURLResponse struct {
 	LoginURL string `json:"login_url"`
 }
 
-// loginCallbackHandler exchanges the query paramater "code" for a jwt id token.
+// loginCallbackHandler exchanges the query parameter "code" for a jwt id token.
 func (e *env) loginCallbackHandler(r *http.Request) (int, interface{}, error) {
 	expectedState := e.state.Get()
 	if strings.TrimSpace(expectedState) == "" {
@@ -80,5 +80,10 @@ func (e *env) loginCallbackHandler(r *http.Request) (int, interface{}, error) {
 			errors.New("id_token is empty")
 	}
 
-	return http.StatusOK, http.StatusText(http.StatusOK), nil
+	return http.StatusOK, LoginCallbackResponse{Token: jwt}, nil
+}
+
+// LoginCallbackResponse is the body of a successful call to the loginCallbackHandler
+type LoginCallbackResponse struct {
+	Token string `json:"token"`
 }

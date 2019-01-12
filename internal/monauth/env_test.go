@@ -166,7 +166,7 @@ func Test_loginCallbackHandler(t *testing.T) {
 		r.URL.RawQuery = vs.Encode()
 		code, bod, err := env.loginCallbackHandler(r)
 		assert.Equal(t, http.StatusOK, code)
-		assert.Equal(t, http.StatusText(http.StatusOK), bod)
+		assert.Equal(t, LoginCallbackResponse{Token: "woooooh"}, bod)
 		assert.NoError(t, err)
 	})
 }
