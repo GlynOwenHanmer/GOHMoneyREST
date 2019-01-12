@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
 	"github.com/glynternet/mon/internal/client"
+	"github.com/glynternet/mon/internal/monauth"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -30,9 +33,15 @@ func loadToken(path string) (string, error) {
 			err, fmt.Sprintf("reading file at path: %s", path),
 		)
 	}
-	token := string(bs)
-	if token == "" {
-		return "", errors.New("file is empty")
+
+	var token monauth.LoginCallbackResponse
+
+	d := json.NewDecoder(bytes.NewReader(bs))
+	d.DisallowUnknownFields()
+	err = d.Decode(&token)
+	if err != nil {
+		return "", errors.WithMessage(err, "unmarshalling token")
 	}
-	return token, nil
+
+	return token.Token, nil
 }
