@@ -4,5 +4,5 @@ type route struct {
 	name       string
 	method     string
 	pattern    string
-	appHandler appJSONHandler
+	appHandler AppJSONHandler
 }
