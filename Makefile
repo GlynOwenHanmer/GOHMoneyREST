@@ -16,14 +16,19 @@ build: moncli monserve
 clean:
 	rm $(BUILD_DIR)/*
 
+monauth:
+	$(MAKE) cmd-all \
+		APP_NAME=$@ \
+		VERSION_VAR=main.version
+
 monserve:
 	$(MAKE) cmd-all \
-		APP_NAME=monserve \
+		APP_NAME=$@ \
 		VERSION_VAR=main.version
 
 moncli:
 	$(MAKE) cmd-all \
-		APP_NAME=moncli \
+		APP_NAME=$@ \
 		VERSION_VAR=github.com/glynternet/mon/cmd/moncli/cmd.version
 
 cmd-all: binary test-binary-version-output dockerfile image

@@ -1,4 +1,12 @@
 builds:
+- binary: monauth
+  ldflags:
+    - -w -X main.version={{.Version}}
+  main: ./cmd/monauth
+  env:
+  - CGO_ENABLED=0
+  goarch:
+    - amd64
 - binary: moncli
   ldflags:
      - -w -X github.com/glynternet/mon/cmd/moncli/cmd.version={{.Version}}
@@ -23,6 +31,10 @@ changelog:
   sort: asc
 
 dockers:
+- binary: monauth
+  dockerfile: bin/Dockerfile.monauth
+  image_templates:
+  - 'glynhanmer/{{.Binary}}:{{ .Version }}'
 - binary: moncli
   dockerfile: bin/Dockerfile.moncli
   image_templates:

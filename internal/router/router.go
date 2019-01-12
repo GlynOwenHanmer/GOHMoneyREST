@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/glynternet/mon/internal/middleware"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -65,7 +66,7 @@ func New(store storage.Storage, log *log.Logger) (*mux.Router, error) {
 func newRouter(rs []route, log *log.Logger) (*mux.Router, error) {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range rs {
-		handler := logger(log, route.appHandler, route.name)
+		handler := middleware.Logger(log, route.appHandler, route.name)
 		router.
 			Methods(route.method).
 			Path(route.pattern).
