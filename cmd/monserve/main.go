@@ -39,7 +39,7 @@ var version = "unknown"
 func main() {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
-	var cmdDBServe = &cobra.Command{
+	var cmdServe = &cobra.Command{
 		Use: appName,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			store, err := newStorage(
@@ -84,32 +84,32 @@ func main() {
 		},
 	}
 
-	cmdDBServe.AddCommand(versioncmd.New(version, os.Stdout))
+	cmdServe.AddCommand(versioncmd.New(version, os.Stdout))
 
 	cobra.OnInitialize(viperAutoEnvVar)
-	cmdDBServe.Flags().String(keyPort, "80", "server listening port")
-	cmdDBServe.Flags().String(keySSLCertificate, "", "path to SSL certificate, leave empty for http")
-	cmdDBServe.Flags().String(keySSLKey, "", "path to SSL key, leave empty for https")
-	cmdDBServe.Flags().String(keyAuth0Domain, "",
+	cmdServe.Flags().String(keyPort, "80", "server listening port")
+	cmdServe.Flags().String(keySSLCertificate, "", "path to SSL certificate, leave empty for http")
+	cmdServe.Flags().String(keySSLKey, "", "path to SSL key, leave empty for https")
+	cmdServe.Flags().String(keyAuth0Domain, "",
 		"auth0 domain to use for authentication. If left empty, no authorisation will be set",
 	)
-	cmdDBServe.Flags().String(keyAuthorisedEmail, "",
+	cmdServe.Flags().String(keyAuthorisedEmail, "",
 		fmt.Sprintf(
 			"email address of authorised user. Must be set if %s is set. Will have no effect if %s is not set",
 			keyAuth0Domain, keyAuth0Domain),
 	)
-	cmdDBServe.Flags().String(keyDBHost, "", "host address of the DB backend")
-	cmdDBServe.Flags().String(keyDBName, "", "name of the DB set to use")
-	cmdDBServe.Flags().String(keyDBUser, "", "DB user to authenticate with")
-	cmdDBServe.Flags().String(keyDBPassword, "", "DB password to authenticate with")
-	cmdDBServe.Flags().String(keyDBSSLMode, "", "DB SSL mode to use")
-	err := viper.BindPFlags(cmdDBServe.Flags())
+	cmdServe.Flags().String(keyDBHost, "", "host address of the DB backend")
+	cmdServe.Flags().String(keyDBName, "", "name of the DB set to use")
+	cmdServe.Flags().String(keyDBUser, "", "DB user to authenticate with")
+	cmdServe.Flags().String(keyDBPassword, "", "DB password to authenticate with")
+	cmdServe.Flags().String(keyDBSSLMode, "", "DB SSL mode to use")
+	err := viper.BindPFlags(cmdServe.Flags())
 	if err != nil {
 		logger.Printf("unable to BindPFlags: %v", err)
 		os.Exit(1)
 	}
 
-	if err := cmdDBServe.Execute(); err != nil {
+	if err := cmdServe.Execute(); err != nil {
 		logger.Println(err)
 		os.Exit(1)
 	}
