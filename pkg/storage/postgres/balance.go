@@ -87,6 +87,10 @@ func (pg postgres) InsertBalance(accountID uint, b balance.Balance, note string)
 	return queryBalance(pg.db, balancesInsertBalance, accountID, b.Date, b.Amount, note)
 }
 
+func (pg postgres) SelectBalance(id uint) (*storage.Balance, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (pg postgres) DeleteBalance(id uint) error {
 	_, err := queryBalance(pg.db, balancesDeleteBalance, time.Now(), id)
 	return errors.Wrap(err, "querying balance")

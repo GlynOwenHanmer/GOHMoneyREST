@@ -47,6 +47,11 @@ func (c Client) InsertBalance(accountID uint, b balance.Balance, note string) (*
 	return unmarshalJSONToBalance(bs)
 }
 
+// SelectBalance selects a balance with a given id
+func (c Client) SelectBalance(id uint) (*storage.Balance, error) {
+	return nil, errors.New("not implemented")
+}
+
 // DeleteBalance deletes a balance at a given id
 func (c Client) DeleteBalance(id uint) error {
 	endpoint := fmt.Sprintf(router.EndpointFmtBalance, id)
