@@ -185,6 +185,9 @@ func insertDeleteAndRetrieveBalances(t *testing.T, store storage.Storage) {
 		err = store.DeleteBalance(inserted.ID)
 		assert.NoError(t, err)
 
+		selected, err = store.SelectBalance(inserted.ID)
+		assert.Error(t, err, "should not be able to select deleted balance")
+
 		bs, err = store.SelectAccountBalances(a.ID)
 		common.FatalIfError(t, err, "selecting account balances")
 		assert.Len(t, *bs, 0)
