@@ -54,11 +54,9 @@ var (
 		balancesSelectFields)
 
 	balancesSelectBalance = fmt.Sprintf(
-		`SELECT %s FROM %s WHERE %s = $1 AND %s IS NULL;`,
-		balancesSelectFields,
-		balancesTable,
-		balancesFieldID,
-		fieldDeleted)
+		`%sAND %s = $1;`,
+		balancesSelectPrefix,
+		balancesFieldID)
 
 	balancesDeleteBalance = fmt.Sprintf(
 		`UPDATE %s SET %s = $1 WHERE id = $2;`,
