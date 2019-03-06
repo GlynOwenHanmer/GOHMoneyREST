@@ -53,6 +53,13 @@ var (
 		balancesInsertFields,
 		balancesSelectFields)
 
+	balancesSelectBalance = fmt.Sprintf(
+		`SELECT %s FROM %s WHERE %s = $1 AND %s IS NULL;`,
+		balancesSelectFields,
+		balancesTable,
+		balancesFieldID,
+		fieldDeleted)
+
 	balancesDeleteBalance = fmt.Sprintf(
 		`UPDATE %s SET %s = $1 WHERE id = $2;`,
 		balancesTable,
@@ -88,7 +95,7 @@ func (pg postgres) InsertBalance(accountID uint, b balance.Balance, note string)
 }
 
 func (pg postgres) SelectBalance(id uint) (*storage.Balance, error) {
-	return nil, errors.New("not implemented")
+	return queryBalance(pg.db, balancesSelectBalance, id)
 }
 
 func (pg postgres) DeleteBalance(id uint) error {
