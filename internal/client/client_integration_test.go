@@ -200,6 +200,32 @@ func TestClient_InsertBalance(t *testing.T) {
 	common.FatalIfError(t, <-errCh, "received error")
 }
 
+func TestClient_SelectBalance(t *testing.T) {
+	id := uint(456)
+	expected := &storage.Balance{ID: id}
+	s := &storagetest.Storage{
+		Balance: expected,
+	}
+
+	r, l, c := newTestComponents(t, s)
+	errCh := make(chan error)
+	go func() {
+		errCh <- http.Serve(l, r)
+	}()
+
+	time.Sleep(time.Millisecond * 10)
+
+	go func() {
+		selected, err := c.SelectBalance(id)
+		assert.NoError(t, err)
+		assert.Equal(t, expected, selected)
+		assert.Equal(t, s.LastBalanceID, id)
+		close(errCh)
+	}()
+
+	common.FatalIfError(t, <-errCh, "received error")
+}
+
 func newTestComponents(t *testing.T, s storage.Storage) (*mux.Router, net.Listener, Client) {
 	r := newTestRouter(t, s)
 	l := newTestNetListener(t)

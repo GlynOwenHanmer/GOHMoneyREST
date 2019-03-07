@@ -53,6 +53,11 @@ var (
 		balancesInsertFields,
 		balancesSelectFields)
 
+	balancesSelectBalance = fmt.Sprintf(
+		`%sAND %s = $1;`,
+		balancesSelectPrefix,
+		balancesFieldID)
+
 	balancesDeleteBalance = fmt.Sprintf(
 		`UPDATE %s SET %s = $1 WHERE id = $2;`,
 		balancesTable,
@@ -85,6 +90,17 @@ func (pg postgres) SelectBalanceByAccountAndID(a storage.Account, balanceID uint
 
 func (pg postgres) InsertBalance(accountID uint, b balance.Balance, note string) (*storage.Balance, error) {
 	return queryBalance(pg.db, balancesInsertBalance, accountID, b.Date, b.Amount, note)
+}
+
+func (pg postgres) SelectBalance(id uint) (*storage.Balance, error) {
+	b, err := queryBalance(pg.db, balancesSelectBalance, id)
+	if err != nil {
+		return nil, errors.Wrap(err, "selecting balance")
+	}
+	if b == nil {
+		return nil, errors.New("no balance")
+	}
+	return b, nil
 }
 
 func (pg postgres) DeleteBalance(id uint) error {

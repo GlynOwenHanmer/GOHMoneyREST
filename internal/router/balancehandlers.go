@@ -46,6 +46,22 @@ func (env *environment) insertBalance(accountID uint, b balance.Balance, note st
 	return http.StatusOK, inserted, nil
 }
 
+func (env *environment) muxBalanceSelectHandlerFunc(r *http.Request) (int, interface{}, error) {
+	id, err := extractID(mux.Vars(r))
+	if err != nil {
+		return http.StatusBadRequest, nil, errors.Wrapf(err, "extracting ID")
+	}
+	return env.selectBalance(id)
+}
+
+func (env *environment) selectBalance(id uint) (int, interface{}, error) {
+	b, err := env.storage.SelectBalance(id)
+	if err != nil {
+		return http.StatusBadRequest, nil, err
+	}
+	return http.StatusOK, b, nil
+}
+
 func (env *environment) muxBalanceDeleteHandlerFunc(r *http.Request) (int, interface{}, error) {
 	id, err := extractID(mux.Vars(r))
 	if err != nil {
