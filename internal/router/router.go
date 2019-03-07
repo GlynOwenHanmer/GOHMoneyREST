@@ -126,6 +126,12 @@ func generateRoutes(e environment) []route {
 			method:     http.MethodPost,
 		},
 		{
+			name:       "BalanceSelect",
+			pattern:    patternBalance,
+			appHandler: e.muxBalanceSelectHandlerFunc,
+			method:     http.MethodGet,
+		},
+		{
 			name:       "BalanceDelete",
 			pattern:    patternBalance,
 			appHandler: e.muxBalanceDeleteHandlerFunc,
