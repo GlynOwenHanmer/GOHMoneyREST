@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"log"
+	"os"
 
+	"github.com/glynternet/mon/pkg/storage"
+	"github.com/glynternet/mon/pkg/table"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -11,6 +14,28 @@ import (
 var balanceCmd = &cobra.Command{
 	Use:   "balance",
 	Short: "interact with a balance",
+}
+
+var balanceSelectCmd = &cobra.Command{
+	Use:   "select [ID]",
+	Short: "select a balance",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(_ *cobra.Command, args []string) error {
+		id, err := parseID(args[0])
+		if err != nil {
+			return errors.Wrap(err, "parsing balance ID")
+		}
+		c, err := newClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
+		b, err := c.SelectBalance(uint(id))
+		if err != nil {
+			return errors.Wrap(err, "selecting balance")
+		}
+		table.Balances(storage.Balances{*b}, os.Stdout)
+		return nil
+	},
 }
 
 var balanceDeleteCmd = &cobra.Command{
@@ -39,6 +64,7 @@ func init() {
 
 	for _, c := range []*cobra.Command{
 		balanceDeleteCmd,
+		balanceSelectCmd,
 	} {
 		err := viper.BindPFlags(c.Flags())
 		if err != nil {
