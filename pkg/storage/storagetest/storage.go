@@ -2,8 +2,6 @@
 package storagetest
 
 import (
-	"errors"
-
 	"github.com/glynternet/go-accounting/account"
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/mon/pkg/storage"
@@ -27,6 +25,7 @@ type Storage struct {
 
 	LastAccountID   uint
 	LastBalanceNote string
+	LastBalanceID   uint
 }
 
 // Available stubs storage.Available method
@@ -69,8 +68,9 @@ func (s *Storage) InsertBalance(accountID uint, _ balance.Balance, note string) 
 }
 
 // SelectBalance stubs the storage.SelectBalance method
-func (s *Storage) SelectBalance(_ uint) (*storage.Balance, error) {
-	return nil, errors.New("not implemented")
+func (s *Storage) SelectBalance(id uint) (*storage.Balance, error) {
+	s.LastBalanceID = id
+	return s.Balance, s.Err
 }
 
 // DeleteBalance stubs the storage.DeleteBalance method

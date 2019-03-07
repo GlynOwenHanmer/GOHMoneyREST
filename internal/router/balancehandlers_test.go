@@ -105,6 +105,37 @@ func TestServer_InsertBalance(t *testing.T) {
 	})
 }
 
+func TestServer_SelectBalance(t *testing.T) {
+	t.Run("id is passed", func(t *testing.T) {
+		store := &storagetest.Storage{}
+		env := &environment{storage: store}
+		_, _, _ = env.selectBalance(999)
+		assert.Equal(t, uint(999), store.LastBalanceID)
+	})
+
+	t.Run("SelectBalance error", func(t *testing.T) {
+		expected := errors.New("SelectBalance error")
+		env := &environment{storage: &storagetest.Storage{
+			Err: expected,
+		}}
+		code, bod, err := env.selectBalance(999)
+		assert.Equal(t, expected, err)
+		assert.Nil(t, bod)
+		assert.Equal(t, http.StatusBadRequest, code)
+	})
+
+	t.Run("all okay", func(t *testing.T) {
+		balance := &storage.Balance{ID: 345}
+		env := &environment{storage: &storagetest.Storage{
+			Balance: balance,
+		}}
+		code, bod, err := env.selectBalance(999)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, code)
+		assert.Equal(t, balance, bod)
+	})
+}
+
 func TestServer_DeleteBalance(t *testing.T) {
 	t.Run("DeleteBalance error", func(t *testing.T) {
 		expected := errors.New("DeleteBalance error")
