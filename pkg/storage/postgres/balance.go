@@ -93,7 +93,14 @@ func (pg postgres) InsertBalance(accountID uint, b balance.Balance, note string)
 }
 
 func (pg postgres) SelectBalance(id uint) (*storage.Balance, error) {
-	return queryBalance(pg.db, balancesSelectBalance, id)
+	b, err := queryBalance(pg.db, balancesSelectBalance, id)
+	if err != nil {
+		return nil, errors.Wrap(err, "selecting balance")
+	}
+	if b == nil {
+		return nil, errors.New("no balance")
+	}
+	return b, nil
 }
 
 func (pg postgres) DeleteBalance(id uint) error {
