@@ -33,11 +33,6 @@ var balanceSelectCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "selecting balance")
 		}
-		a, err := c.SelectAccount(b.ID)
-		if err != nil {
-			return errors.Wrapf(err, "selecting account for balance %+v", b)
-		}
-		table.Accounts(storage.Accounts{*a}, os.Stdout)
 		table.Balances(storage.Balances{*b}, os.Stdout)
 		return nil
 	},
@@ -60,11 +55,6 @@ var balanceDeleteCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "selecting balance")
 		}
-		a, err := c.SelectAccount(b.ID)
-		if err != nil {
-			return errors.Wrapf(err, "selecting account for balance %+v", b)
-		}
-		table.Accounts(storage.Accounts{*a}, os.Stdout)
 		table.Balances(storage.Balances{*b}, os.Stdout)
 		return c.DeleteBalance(uint(id))
 	},
