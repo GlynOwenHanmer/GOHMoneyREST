@@ -71,6 +71,7 @@ func main() {
 				viper.GetString(keySSLKey),
 			)
 			addr := ":" + viper.GetString(keyPort)
+			logger.Printf("Version: %s", version)
 			logger.Printf("Serving at %s", addr)
 			return serveFn(addr, handler)
 		},
