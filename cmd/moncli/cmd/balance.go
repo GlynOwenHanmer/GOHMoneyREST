@@ -26,7 +26,7 @@ var balanceSelectCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "parsing balance ID")
 		}
-		c, err := newClient()
+		c, err := NewClient()
 		if err != nil {
 			return errors.Wrap(err, "creating new client")
 		}
@@ -48,7 +48,7 @@ var balanceDeleteCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "parsing balance ID")
 		}
-		c, err := newClient()
+		c, err := NewClient()
 		if err != nil {
 			return errors.Wrap(err, "creating new client")
 		}

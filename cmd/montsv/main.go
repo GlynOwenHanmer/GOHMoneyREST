@@ -11,7 +11,7 @@ import (
 	"github.com/glynternet/go-accounting/account"
 	"github.com/glynternet/go-accounting/balance"
 	"github.com/glynternet/go-money/currency"
-	"github.com/glynternet/mon/internal/client"
+	"github.com/glynternet/mon/cmd/moncli/cmd"
 	"github.com/glynternet/mon/pkg/filter"
 	"github.com/glynternet/mon/pkg/storage"
 	"github.com/pkg/errors"
@@ -40,8 +40,11 @@ var now = time.Now()
 var cmdTSV = &cobra.Command{
 	Use:  appName,
 	Args: cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		c := client.Client(viper.GetString(keyServerHost))
+	RunE: func(_ *cobra.Command, args []string) error {
+		c, err := cmd.NewClient()
+		if err != nil {
+			return errors.Wrap(err, "creating new client")
+		}
 		as, err := c.SelectAccounts()
 		if err != nil {
 			return errors.Wrap(err, "selecting accounts")

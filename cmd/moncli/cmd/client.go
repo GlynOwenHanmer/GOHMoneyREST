@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func newClient() (client.Client, error) {
+func NewClient() (client.Client, error) {
 	var options []client.Option
 	tokenPath := viper.GetString(keyAuthTokenFile)
 	if tokenPath != "" {

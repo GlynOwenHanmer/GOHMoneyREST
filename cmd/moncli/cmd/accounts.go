@@ -47,7 +47,7 @@ var accountsCmd = &cobra.Command{
 			atDate.Time = &now
 		}
 
-		c, err := newClient()
+		c, err := NewClient()
 		if err != nil {
 			return errors.WithMessage(err, "creating new client")
 		}
@@ -77,7 +77,7 @@ var accountsBalancesCmd = &cobra.Command{
 			atDate.Time = &now
 		}
 
-		c, err := newClient()
+		c, err := NewClient()
 		if err != nil {
 			return errors.WithMessage(err, "creating new client")
 		}
