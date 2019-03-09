@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -55,6 +56,7 @@ var balanceDeleteCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "selecting balance")
 		}
+		fmt.Println("Deleted:")
 		table.Balances(storage.Balances{*b}, os.Stdout)
 		return c.DeleteBalance(uint(id))
 	},
