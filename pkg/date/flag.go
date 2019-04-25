@@ -98,5 +98,4 @@ func (mdp monthDateParser) parse(val string) (time.Time, error) {
 	}
 
 	return time.Date(mdp.getYear(), d.Month(), d.Day(), 0, 0, 0, 0, time.UTC), nil
-
 }
