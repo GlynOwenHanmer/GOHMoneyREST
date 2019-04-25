@@ -65,8 +65,10 @@ func TestFlag_SetLongFormat(t *testing.T) {
 					f := &flag{}
 					err := f.Set(v)
 					assert.NoError(t, err)
-					assert.NotNil(t, f)
-					assert.Equal(t, test.Time, *f.Time)
+					if assert.NotNil(t, f) &&
+						assert.NotNil(t, *f.Time) {
+						assert.Equal(t, test.Time, *f.Time)
+					}
 				})
 			}
 		})

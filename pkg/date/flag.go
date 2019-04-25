@@ -9,9 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	longDateFormat = "2006-1-2"
-)
+const longDateFormat = "2006-1-2"
 
 type flag struct {
 	*time.Time
