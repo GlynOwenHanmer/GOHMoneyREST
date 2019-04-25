@@ -9,7 +9,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-const dateFormat = "2006-1-2"
+const (
+	longDateFormat = "2006-1-2"
+)
 
 type flag struct {
 	*time.Time
@@ -26,7 +28,7 @@ func (f flag) String() string {
 	if f.Time == nil {
 		return ""
 	}
-	return f.Time.Format(dateFormat)
+	return f.Time.Format(longDateFormat)
 }
 
 // Type returns the string that represents the type of flag.
@@ -49,7 +51,7 @@ func (f *flag) Set(value string) error {
 	for _, parse := range []func(string) (time.Time, error){
 		parseYesterday,
 		parseRelative,
-		format(dateFormat).parse,
+		format(longDateFormat).parse,
 	} {
 		d, err := parse(val)
 		if err == nil {

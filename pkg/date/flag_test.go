@@ -45,14 +45,14 @@ func TestFlag_SetErrors(t *testing.T) {
 	}
 }
 
-func TestFlag_SetExplicit(t *testing.T) {
+func TestFlag_SetLongFormat(t *testing.T) {
 	for _, test := range []struct {
 		name string
 		vals []string
 		time.Time
 	}{
 		{
-			name: "valid explicit",
+			name: "valid long format",
 			vals: []string{"2018-03-02", "2018-3-2"},
 			Time: time.Date(2018, 03, 02, 0, 0, 0, 0, time.UTC),
 		},
