@@ -27,7 +27,7 @@ func TestFlag_SetErrors(t *testing.T) {
 		},
 		{
 			name: "invalid date format",
-			vals: []string{"02/03", "-1000-01-87", "03-02"},
+			vals: []string{"02/03", "-1000-01-87"},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -45,14 +45,14 @@ func TestFlag_SetErrors(t *testing.T) {
 	}
 }
 
-func TestFlag_SetExplicit(t *testing.T) {
+func TestFlag_SetLongFormat(t *testing.T) {
 	for _, test := range []struct {
 		name string
 		vals []string
 		time.Time
 	}{
 		{
-			name: "valid explicit",
+			name: "valid long format",
 			vals: []string{"2018-03-02", "2018-3-2"},
 			Time: time.Date(2018, 03, 02, 0, 0, 0, 0, time.UTC),
 		},
@@ -65,8 +65,40 @@ func TestFlag_SetExplicit(t *testing.T) {
 					f := &flag{}
 					err := f.Set(v)
 					assert.NoError(t, err)
-					assert.NotNil(t, f)
-					assert.Equal(t, test.Time, *f.Time)
+					if assert.NotNil(t, f) &&
+						assert.NotNil(t, *f.Time) {
+						assert.Equal(t, test.Time, *f.Time)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestFlag_SetMonthDate(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		vals []string
+		time.Time
+	}{
+		{
+			name: "valid month date",
+			vals: []string{"03-02", "3-2"},
+			Time: time.Date(time.Now().Year(), 03, 02, 0, 0, 0, 0, time.UTC),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			for key, val := range test.vals {
+				k := key
+				v := val
+				t.Run(fmt.Sprintf("%d-%s", k, val), func(t *testing.T) {
+					f := &flag{}
+					err := f.Set(v)
+					assert.NoError(t, err)
+					if assert.NotNil(t, f) &&
+						assert.NotNil(t, *f.Time) {
+						assert.Equal(t, test.Time, *f.Time)
+					}
 				})
 			}
 		})

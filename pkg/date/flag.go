@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const dateFormat = "2006-1-2"
+const longDateFormat = "2006-1-2"
 
 type flag struct {
 	*time.Time
@@ -26,7 +26,7 @@ func (f flag) String() string {
 	if f.Time == nil {
 		return ""
 	}
-	return f.Time.Format(dateFormat)
+	return f.Time.Format(longDateFormat)
 }
 
 // Type returns the string that represents the type of flag.
@@ -36,9 +36,10 @@ func (flag) Type() string {
 
 // Set parses the given string, attempting to create a logical date from its
 // content. Set will match:
-// - any supported date format;
-// - 'y' or 'yesterday', case-insensitively;
 // - any value that can be parse into an integer, as a relative date.
+// - 'y' or 'yesterday', case-insensitively;
+// - any supported date format;
+// - m{1,2}d{1,2} and use the current year for the year value
 func (f *flag) Set(value string) error {
 	val := strings.TrimSpace(value)
 	if val == "" {
@@ -49,7 +50,8 @@ func (f *flag) Set(value string) error {
 	for _, parse := range []func(string) (time.Time, error){
 		parseYesterday,
 		parseRelative,
-		format(dateFormat).parse,
+		format(longDateFormat).parse,
+		monthDateParser{getYear: func() int { return time.Now().Year() }}.parse,
 	} {
 		d, err := parse(val)
 		if err == nil {
@@ -82,4 +84,19 @@ type format string
 func (fmt format) parse(val string) (time.Time, error) {
 	d, err := time.Parse(string(fmt), val)
 	return d, errors.Wrapf(err, "parsing into format:%s", fmt)
+}
+
+type monthDateParser struct {
+	getYear func() int
+}
+
+func (mdp monthDateParser) parse(val string) (time.Time, error) {
+	const shortDateFormat = "1-2"
+	d, err := time.Parse(string(shortDateFormat), val)
+	if err != nil {
+		return time.Time{}, errors.Wrapf(err, "parsing into format:%s", shortDateFormat)
+	}
+
+	return time.Date(mdp.getYear(), d.Month(), d.Day(), 0, 0, 0, 0, time.UTC), nil
+
 }
